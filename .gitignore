@@ -1,0 +1,15 @@
+
+# vscode stuff
+.vscode/
+
+# dependencies
+external/
+
+# object files
+*.o
+
+# emscripten output files
+emscripten-build.html
+emscripten-build.data
+emscripten-build.js
+emscripten-build.wasm
