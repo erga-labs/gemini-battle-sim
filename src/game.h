@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "src/world.h"
 #include <raylib/raylib.h>
 
 
@@ -13,12 +14,15 @@ public:
     void processFrame();
 
 private:
+    void setup();
     void loadAssets();
     void drawFrame();
     void processInputs();
+    void processCameraInputs();
 
 private:
-    Texture m_texture;
-    float m_textureRotation = 0.0;
+    Camera2D m_camera;
+    Vector2 m_worldBounds;
 
+    World m_gameWorld;
 };
