@@ -15,6 +15,7 @@ public:
     World(Vector2 bounds);
     ~World();
     void draw(Camera2D gameCamera);
+    void setBattalionColor(Color color);
 
 private:
     bool m_initialized = false;

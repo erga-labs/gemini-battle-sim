@@ -88,3 +88,8 @@ void Game::processCameraInputs() {
 
     m_camera.target = Vector2Clamp(m_camera.target, {0, 0}, m_worldBounds);
 }
+
+
+void Game::setBattalionColor(Color color) {
+    m_gameWorld.setBattalionColor(color);
+}

@@ -12,6 +12,7 @@ public:
     ~Game();
     void startGameLoop();
     void processFrame();
+    void setBattalionColor(Color color);
 
 private:
     void setup();

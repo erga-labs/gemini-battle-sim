@@ -1,6 +1,6 @@
 
 CXXFLAGS = -O1
-EMFLAGS = -s USE_GLFW=3 --preload-file assets
+EMFLAGS = -s USE_GLFW=3 --preload-file assets -sEXPORTED_FUNCTIONS=_setColor,_main
 INCLUDES = -I . -I external/
 LDFLAGS  = -L external/raylib -lraylib
 

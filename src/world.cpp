@@ -11,7 +11,7 @@ World::World(Vector2 bounds) {
         {bounds.x / 2, bounds.y / 2},
         {bounds.x / 2, (bounds.y - 20) / 2},
     };
-    const int numBattalions = sizeof(positions) / sizeof(Battalion);
+    const int numBattalions = sizeof(positions) / sizeof(Vector2);
 
     for (int i = 0; i < numBattalions; i++) {
         m_battalions.push_back(Battalion(positions[i]));
@@ -41,4 +41,11 @@ void World::draw(Camera2D gameCamera) {
     }
 
     EndMode2D();
+}
+
+
+void World::setBattalionColor(Color color) {
+    for (auto& b : m_battalions) {
+        b.setColor(color);
+    }
 }
