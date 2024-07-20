@@ -22,7 +22,9 @@ Game::~Game() {
 }
 
 
-void Game::startGameLoop() { emscripten_set_main_loop_arg(emscriptenMainLoop, this, 0, 1); }
+void Game::startGameLoop() {
+    emscripten_set_main_loop_arg(emscriptenMainLoop, this, 0, 1);
+}
 
 
 void Game::processFrame() {
@@ -45,7 +47,15 @@ void Game::setup() {
         .zoom = 10.0,
     };
 
-    m_gameWorld = World(m_worldBounds);
+    const Vector2 positions[] = {
+        {m_worldBounds.x / 2, m_worldBounds.y / 2},
+        {m_worldBounds.x / 2, (m_worldBounds.y - 20) / 2},
+    };
+    const int numBattalions = sizeof(positions) / sizeof(Vector2);
+
+    for (int i = 0; i < numBattalions; i++) {
+        m_battalions.push_back(Battalion(positions[i]));
+    }
 }
 
 
@@ -54,7 +64,10 @@ void Game::loadAssets() {
 
 
 void Game::drawFrame() {
-    m_gameWorld.draw(m_camera);
+    BeginMode2D(m_camera);
+    drawWorld();
+    drawBattalions();
+    EndMode2D();
 
     DrawText(TextFormat("CamPos: %f %f", m_camera.target.x, m_camera.target.y), 10, 10, 20, BLACK);
     DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
@@ -91,5 +104,24 @@ void Game::processCameraInputs() {
 
 
 void Game::setBattalionColor(Color color) {
-    m_gameWorld.setBattalionColor(color);
+    for (Battalion& b : m_battalions) {
+        b.setColor(color);
+    }
+}
+
+
+void Game::drawWorld() {
+    const Rectangle rec = {0, 0, m_worldBounds.x, m_worldBounds.y};
+    const Color c1 = {255, 255, 255, 150};
+    const Color c2 = {255, 0, 0, 150};
+    const Color c3 = {0, 255, 0, 150};
+    const Color c4 = {0, 0, 255, 150};
+    DrawRectangleGradientEx(rec, c1, c2, c3, c4);
+}
+
+
+void Game::drawBattalions() {
+    for (Battalion& b : m_battalions) {
+        b.draw();
+    }
 }

@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "src/world.h"
+#include "src/battalion.h"
 #include <raylib/raylib.h>
+#include <vector>
 
 
 class Game {
@@ -20,10 +21,13 @@ private:
     void drawFrame();
     void processInputs();
     void processCameraInputs();
+    void drawWorld();
+    void drawBattalions();
 
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
 
-    World m_gameWorld;
+    std::vector<Battalion> m_battalions;
+
 };
