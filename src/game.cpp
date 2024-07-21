@@ -69,7 +69,8 @@ void Game::drawFrame() {
     drawBattalions();
     EndMode2D();
 
-    DrawText(TextFormat("CamPos: %f %f", m_camera.target.x, m_camera.target.y), 10, 10, 20, BLACK);
+    const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
+    DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
     DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
 }
 
@@ -97,9 +98,16 @@ void Game::processCameraInputs() {
     }
 
     const float zoomDelta = GetMouseWheelMove();
-    m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, 5, 15);
+    const float minZoom = 5;
+    const float maxZoom = 15;
+    m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
 
-    m_camera.target = Vector2Clamp(m_camera.target, {0, 0}, m_worldBounds);
+    Vector2 camPadding = {15, 15};
+    camPadding = Vector2Scale(camPadding, 1/m_camera.zoom);
+    camPadding = Vector2Multiply(camPadding, {16, 9});
+    const Vector2 minCamPos = camPadding;
+    const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
+    m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
 }
 
 
