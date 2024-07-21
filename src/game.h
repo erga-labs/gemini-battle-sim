@@ -30,4 +30,6 @@ private:
 
     std::vector<Battalion> m_battalions;
 
+    // created by `WorldGen`
+    Texture m_worldTexture;
 };

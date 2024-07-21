@@ -1,5 +1,6 @@
 
 #include "src/game.h"
+#include "src/worldgen.h"
 #include <emscripten.h>
 #include <raylib/raymath.h>
 
@@ -18,6 +19,7 @@ Game::Game(int windowWidth, int windowHeight, const char* windowTitle) {
 
 
 Game::~Game() {
+    UnloadTexture(m_worldTexture);
     CloseWindow();
 }
 
@@ -56,6 +58,8 @@ void Game::setup() {
     for (int i = 0; i < numBattalions; i++) {
         m_battalions.push_back(Battalion(positions[i]));
     }
+
+    m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
 }
 
 
@@ -119,12 +123,10 @@ void Game::setBattalionColor(Color color) {
 
 
 void Game::drawWorld() {
-    const Rectangle rec = {0, 0, m_worldBounds.x, m_worldBounds.y};
-    const Color c1 = {255, 255, 255, 150};
-    const Color c2 = {255, 0, 0, 150};
-    const Color c3 = {0, 255, 0, 150};
-    const Color c4 = {0, 0, 255, 150};
-    DrawRectangleGradientEx(rec, c1, c2, c3, c4);
+
+    const Rectangle srcRect = {0, 0, (float)m_worldTexture.width, (float)m_worldTexture.height};
+    DrawTexturePro(m_worldTexture, srcRect, {0, 0, m_worldBounds.x, m_worldBounds.y}, {0, 0}, 0, WHITE);
+
 }
 
 
