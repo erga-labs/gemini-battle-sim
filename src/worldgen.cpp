@@ -17,7 +17,8 @@ std::vector<Tile> WorldGen::createWorld(int boundX, int boundY) {
 
 
 Texture WorldGen::createWorldTexture(int boundX, int boundY) {
-    const float resoultion = 16;
+    // how crisp the texture is (16 is a good number for now)
+    const float crispFactor = 16;
     
     Texture tiles[] = {
         LoadTexture("assets/grass.png"),
@@ -26,7 +27,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY) {
 
     const std::vector<Tile> worldData = createWorld(boundX, boundY);
     // the world will be drawn into this
-    RenderTexture renderTex = LoadRenderTexture(boundX * resoultion, boundY * resoultion);
+    RenderTexture renderTex = LoadRenderTexture(boundX * crispFactor, boundY * crispFactor);
 
     BeginTextureMode(renderTex);
 
@@ -34,7 +35,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY) {
         for (int x = 0; x < boundX; x++) {
             const Texture tex = tiles[(int) worldData[x + y * boundY]];
             const Rectangle srcRect = {0, 0, (float) tex.width, (float) tex.height};
-            const Rectangle destRect = {x*resoultion, y*resoultion, resoultion, resoultion};
+            const Rectangle destRect = {x*crispFactor, y*crispFactor, crispFactor, crispFactor};
             DrawTexturePro(tex, srcRect, destRect, {0, 0}, 0, WHITE);
         }
     }
