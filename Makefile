@@ -10,7 +10,7 @@ OBJECTS = $(SOURCES:.cpp=.o)
 
 
 emscripten-build: main.cpp $(OBJECTS)
-	em++ -o emscripten-build.html $^ $(CXXFLAGS) $(EMFLAGS) $(INCLUDES) $(LDFLAGS)
+	em++ -o emscripten-build.js $^ $(CXXFLAGS) $(EMFLAGS) $(INCLUDES) $(LDFLAGS)
 
 
 %.o: %.cpp
@@ -19,7 +19,6 @@ emscripten-build: main.cpp $(OBJECTS)
 
 clean:
 	rm -f $(wildcard src/*.o)
-	rm -f emscripten-build.html
 	rm -f emscripten-build.js
 	rm -f emscripten-build.wasm
 	rm -f emscripten-build.data
