@@ -1,16 +1,18 @@
 #pragma once
 
-#include <Raylib/raylib.h>
+#include <raylib/raylib.h>
 #include <memory>
 #include <vector>
-#include <Raylib/raymath.h>
+#include <raylib/raymath.h>
 
-enum class B_Type {
+enum class B_Type
+{
     Archer = 0,
     Warrior = 1
 };
 
-class Battalion {
+class Battalion
+{
 
 public:
     Battalion(
@@ -21,13 +23,12 @@ public:
         Vector2 pos,
         int init_size,
         float damage,
-        B_Type type
-    );
+        B_Type type);
 
     ~Battalion();
-    
+
     void draw();
-    
+
     void setDebugColor(Color color);
 
     void update();
@@ -50,5 +51,5 @@ private:
     B_Type m_type;
     std::weak_ptr<Battalion> m_target;
     Color m_debugColor;
-    float m_rotation; 
+    float m_rotation;
 };
