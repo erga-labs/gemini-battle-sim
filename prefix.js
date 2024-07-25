@@ -6,7 +6,7 @@ Module.print = (...args) => {
     console.log(text);
 };
 
-Module.canvas = document.getElementById("myCanvas");
+Module.canvas = document.getElementById("canvas");
 
 // used for stuff like telling the thing is being downloaded
 // if error occurs, this is chaned
