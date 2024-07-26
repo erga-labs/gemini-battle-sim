@@ -58,7 +58,7 @@ void Game::setup()
 
     for (int i = 0; i < numBattalions; i++)
     {
-        // m_battalions.push_back(Battalion(std::weak_ptr<Battalion>(), 0, 0, 0, positions[i], 5, 0, B_Type::Warrior));
+        m_battalions.push_back(Battalion(std::weak_ptr<Battalion>(), 0, 0, 0, positions[i], 5, 0, B_Type::Warrior));
     }
 
     m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
@@ -140,6 +140,6 @@ void Game::drawBattalions()
 {
     for (Battalion &b : m_battalions)
     {
-        // b.draw(m_camera);
+        b.draw(m_camera);
     }
 }

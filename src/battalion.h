@@ -27,7 +27,7 @@ public:
 
     ~Battalion();
 
-    void draw();
+    void draw(const Camera2D &cam);
 
     void setDebugColor(Color color);
 
@@ -40,7 +40,7 @@ private:
     void attack();
     void move();
     void checkTarget();
-    bool isMouseHover() const; // New method
+    bool isMouseHover(const Camera2D &cam) const; // New method
 
     int m_group;
     float m_aggression;

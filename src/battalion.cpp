@@ -17,14 +17,16 @@ Battalion::Battalion(
 
 Battalion::~Battalion() {}
 
-void Battalion::draw()
+void Battalion::draw(const Camera2D &cam)
 {
-    Color colorToDraw = isMouseHover() ? m_debugColor : Color{m_debugColor.r, m_debugColor.g, m_debugColor.b, 0}; // Transparent if not hovered
+    Color colorToDraw = isMouseHover(cam) ? m_debugColor : Color{m_debugColor.r, m_debugColor.g, m_debugColor.b, 100}; // Transparent if not hovered
     DrawRectanglePro(
         {m_position.x, m_position.y, float(m_size), float(m_size)}, // Rectangle
         {m_size / 2.0f, m_size / 2.0f},
         m_rotation, // Rotation angle
         colorToDraw);
+
+    DrawCircle(m_position.x, m_position.y, 1, RED);
 }
 
 void Battalion::setDebugColor(Color color)
@@ -32,9 +34,10 @@ void Battalion::setDebugColor(Color color)
     m_debugColor = color;
 }
 
-bool Battalion::isMouseHover() const
+bool Battalion::isMouseHover(const Camera2D &cam) const
 {
-    Vector2 mousePosition = GetMousePosition();
+    // const Vector2 mousePosition = GetMousePosition();
+    const Vector2 mousePosition = GetScreenToWorld2D(GetMousePosition(), cam);
     return CheckCollisionPointRec(mousePosition, {m_position.x, m_position.y, float(m_size), float(m_size)});
 }
 
