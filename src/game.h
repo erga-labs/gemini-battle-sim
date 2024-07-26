@@ -5,11 +5,11 @@
 #include <raylib/raylib.h>
 #include <vector>
 
-
-class Game {
+class Game
+{
 
 public:
-    Game(int windowWidth, int windowHeight, const char* windowTitle = "Ant Simulation");
+    Game(int windowWidth, int windowHeight, const char *windowTitle = "Ant Simulation");
     ~Game();
     void startGameLoop();
     void processFrame();
@@ -21,15 +21,17 @@ private:
     void drawFrame();
     void processInputs();
     void processCameraInputs();
+    void drawCloud(uint8_t alpha);
     void drawWorld();
     void drawBattalions();
 
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
+    float m_cloudPos = 0.0;
 
     std::vector<Battalion> m_battalions;
 
     // created by `WorldGen`
-    Texture m_worldTexture;
+    Texture m_worldTexture, m_cloudTexture;
 };

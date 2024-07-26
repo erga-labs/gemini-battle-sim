@@ -4,6 +4,9 @@
 #include <emscripten.h>
 #include <raylib/raymath.h>
 
+const float minZoom = 15;
+const float maxZoom = 30;
+
 void emscriptenMainLoop(void *arg)
 {
     ((Game *)arg)->processFrame();
@@ -32,7 +35,7 @@ void Game::startGameLoop()
 void Game::processFrame()
 {
     BeginDrawing();
-    ClearBackground(DARKGRAY);
+    ClearBackground(ColorBrightness(BLUE, 0.2));
 
     processInputs();
     drawFrame();
@@ -62,6 +65,7 @@ void Game::setup()
     }
 
     m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
+    m_cloudTexture = WorldGen::createCloudTexture();
 }
 
 void Game::loadAssets()
@@ -71,8 +75,14 @@ void Game::loadAssets()
 void Game::drawFrame()
 {
     BeginMode2D(m_camera);
+    drawCloud(220);
     drawWorld();
     drawBattalions();
+
+    const float cameraZoomRange = maxZoom - minZoom;
+    const float alphaT = (m_camera.zoom - minZoom) / cameraZoomRange;
+
+    drawCloud(Lerp(20, 40, 1 - alphaT));
     EndMode2D();
 
     const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
@@ -82,6 +92,7 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
+    m_cloudPos += 0.01;
     processCameraInputs();
 }
 
@@ -108,8 +119,6 @@ void Game::processCameraInputs()
     }
 
     const float zoomDelta = GetMouseWheelMove();
-    const float minZoom = 15;
-    const float maxZoom = 30;
     m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
 
     Vector2 camPadding = {15, 15};
@@ -126,6 +135,13 @@ void Game::setBattalionColor(Color color)
     {
         b.setColor(color);
     }
+}
+
+void Game::drawCloud(uint8_t alpha)
+{
+    const Rectangle srcRect = {m_cloudPos, 0, (float)m_cloudTexture.width / 2.0f, (float)m_cloudTexture.height};
+    const Rectangle destRect = {-15, -15, m_worldBounds.x + 30, m_worldBounds.y + 30};
+    DrawTexturePro(m_cloudTexture, srcRect, destRect, {0, 0}, 0, {255, 255, 255, alpha});
 }
 
 void Game::drawWorld()
