@@ -79,7 +79,8 @@ void Game::setup()
 
 
     m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
-    m_cloudTexture = WorldGen::createCloudTexture();
+    m_cloudTexture = LoadTexture("assets/cloud_map.png");
+    SetTextureWrap(m_cloudTexture, TEXTURE_WRAP_REPEAT);
 }
 
 void Game::loadAssets()
@@ -111,7 +112,7 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
-    m_cloudPos += 0.007;
+    m_cloudPos += 0.07;
     processCameraInputs();
 }
 

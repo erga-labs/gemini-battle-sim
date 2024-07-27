@@ -109,26 +109,3 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
 
     return out;
 }
-
-Texture WorldGen::createCloudTexture()
-{
-    // NOTE: Maybe have an actual cloud asset
-    Image cloudImage = GenImageWhiteNoise(32, 16, 0.3);
-    Color *data = (Color *)cloudImage.data;
-    const Color cloudColor = ColorBrightness(SKYBLUE, -0.1);
-
-    for (int i = 0; i < cloudImage.width * cloudImage.height; i++)
-    {
-        data[i].a = data[i].r;
-        if (data[i].a == 255)
-        {
-            data[i] = cloudColor;
-        }
-    }
-
-    Texture out = LoadTextureFromImage(cloudImage);
-    SetTextureWrap(out, TEXTURE_WRAP_REPEAT);
-
-    UnloadImage(cloudImage);
-    return out;
-}

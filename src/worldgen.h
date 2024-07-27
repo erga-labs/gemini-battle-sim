@@ -17,5 +17,4 @@ class WorldGen
 public:
     static std::vector<Tile> createWorld(int boundX, int boundY);
     static Texture createWorldTexture(int boundX, int boundY);
-    static Texture createCloudTexture();
 };
