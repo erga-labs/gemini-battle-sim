@@ -14,24 +14,28 @@ public:
     ~Game();
     void startGameLoop();
     void processFrame();
-    void setBattalionColor(Color color);
 
 private:
+    // initializes the game
     void setup();
+    // draws single frame
     void drawFrame();
+    // handles inputs
     void processInputs();
-    void processCameraInputs();
+    // draw the cloud map with some transparancy
     void drawCloud(uint8_t alpha);
+    // draw the actual world
     void drawWorld();
+    // draw the battalions
     void drawBattalions();
 
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
-    float m_cloudPos = 0.0;
 
     std::vector<std::shared_ptr<Battalion>> m_battalions;
 
+    float m_cloudDrawOffset = 0.0;
     // created by `WorldGen`
     Texture m_worldTexture, m_cloudTexture;
 };

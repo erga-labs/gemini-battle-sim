@@ -22,6 +22,7 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 
 Game::~Game()
 {
+    UnloadTexture(m_cloudTexture);
     UnloadTexture(m_worldTexture);
     CloseWindow();
 }
@@ -33,6 +34,8 @@ void Game::startGameLoop()
 
 void Game::processFrame()
 {
+    m_cloudDrawOffset += 0.07;
+
     BeginDrawing();
     ClearBackground(ColorBrightness(BLUE, 0.2));
 
@@ -88,10 +91,11 @@ void Game::drawFrame()
     drawWorld();
     drawBattalions();
 
+    // zooming in increases opacity
     const float cameraZoomRange = maxZoom - minZoom;
     const float alphaT = (m_camera.zoom - minZoom) / cameraZoomRange;
-
     drawCloud(Lerp(20, 40, 1 - alphaT));
+
     EndMode2D();
 
     for (auto &b : m_battalions)
@@ -106,34 +110,16 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
-    m_cloudPos += 0.07;
-    processCameraInputs();
-}
-
-void Game::processCameraInputs()
-{
-
-    const float camMoveSpeed = 10 / m_camera.zoom;
-
-    if (IsKeyDown(KEY_W))
-    {
-        m_camera.target.y -= camMoveSpeed;
-    }
-    if (IsKeyDown(KEY_A))
-    {
-        m_camera.target.x -= camMoveSpeed;
-    }
-    if (IsKeyDown(KEY_S))
-    {
-        m_camera.target.y += camMoveSpeed;
-    }
-    if (IsKeyDown(KEY_D))
-    {
-        m_camera.target.x += camMoveSpeed;
-    }
-
     const float zoomDelta = GetMouseWheelMove();
     m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
+
+    Vector2 camMoveVec = {0, 0};
+    camMoveVec.x -= IsKeyDown(KEY_A);
+    camMoveVec.x += IsKeyDown(KEY_D);
+    camMoveVec.y -= IsKeyDown(KEY_W);
+    camMoveVec.y += IsKeyDown(KEY_S);
+    camMoveVec = Vector2Scale(camMoveVec, 10.0f / m_camera.zoom);
+    m_camera.target = Vector2Add(m_camera.target, camMoveVec);
 
     Vector2 camPadding = {15, 15};
     camPadding = Vector2Scale(camPadding, 1 / m_camera.zoom);
@@ -143,17 +129,9 @@ void Game::processCameraInputs()
     m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
 }
 
-void Game::setBattalionColor(Color color)
-{
-    // for (Battalion &b : m_battalions)
-    // {
-    // b.setColor(color);
-    // }
-}
-
 void Game::drawCloud(uint8_t alpha)
 {
-    const Rectangle srcRect = {m_cloudPos, 0, (float)m_cloudTexture.width / 2.0f, (float)m_cloudTexture.height};
+    const Rectangle srcRect = {m_cloudDrawOffset, 0, (float)m_cloudTexture.width / 2.0f, (float)m_cloudTexture.height};
     const Rectangle destRect = {-15, -15, m_worldBounds.x + 30, m_worldBounds.y + 30};
     DrawTexturePro(m_cloudTexture, srcRect, destRect, {0, 0}, 0, {255, 255, 255, alpha});
 }
