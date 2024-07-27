@@ -6,7 +6,8 @@ std::vector<Tile> WorldGen::createWorld(int boundX, int boundY)
     // creating a vec of fixed size
     std::vector<Tile> tiles(boundX * boundY);
 
-    Image noiseImage = GenImagePerlinNoise(boundX, boundY, 0, 0, 2);
+    const int offset = GetRandomValue(0, 100) * 100;
+    Image noiseImage = GenImagePerlinNoise(boundX, boundY, offset, offset, 3);
     Color *noiseData = (Color *)noiseImage.data;
 
     for (int y = 0; y < boundY; y++)

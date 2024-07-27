@@ -92,7 +92,7 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
-    m_cloudPos += 0.01;
+    m_cloudPos += 0.007;
     processCameraInputs();
 }
 
