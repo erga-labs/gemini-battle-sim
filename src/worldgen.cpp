@@ -48,6 +48,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
         LoadTexture("assets/weeded_grass_2.png"),
         LoadTexture("assets/grass_1.png"),
         LoadTexture("assets/grass_2.png"),
+        LoadTexture("assets/grass_overlay.png"),
     };
     const int numAssets = sizeof(assets) / sizeof(Texture);
 
@@ -66,16 +67,31 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
             const Texture tex = assets[texIndex];
             const Rectangle srcRect = {0, 0, (float)tex.width, (float)tex.height};
             const Rectangle destRect = {x * crispFactor, y * crispFactor, crispFactor, crispFactor};
-            // const int rotation = GetRandomValue(0, 3);
-            const int rotation = 0;
+            DrawTexturePro(tex, srcRect, destRect, {0, 0}, 0, WHITE);
 
-            // the X origin changes when the angle is 180 or 270 degrees
-            const float originX = (rotation == 2 || rotation == 3) ? 1 : 0;
-            // the Y origin changes when the angle is 90 or 180 degrees
-            const float originY = (rotation == 1 || rotation == 2) ? 1 : 0;
-            const Vector2 origin = {originX * crispFactor, originY * crispFactor};
+            if (tile == Tile::Dirt)
+            {
+                const int offsets[4][2] = {{0, -1}, {-1, 0}, {1, 0}, {0, 1}};
+                for (int i = 0; i < 4; i++)
+                {
+                    const int dx = x - offsets[i][0];
+                    const int dy = y - offsets[i][1];
+                    if (dx < 0 || dx > boundX || dy < 0 || dy > boundY || worldData[dx + dy * boundX] == Tile::Dirt)
+                    {
+                        continue;
+                    }
 
-            DrawTexturePro(tex, srcRect, destRect, origin, rotation * 90, WHITE);
+                    const int quads[4] = {3, 2, 0, 1};
+                    const int quad = quads[i];
+                    // the X origin changes when the angle is 180 or 270 degrees
+                    const float originX = (quad == 2 || quad == 3) ? 1 : 0;
+                    // the Y origin changes when the angle is 90 or 180 degrees
+                    const float originY = (quad == 1 || quad == 2) ? 1 : 0;
+                    const Vector2 origin = {originX * crispFactor, originY * crispFactor};
+
+                    DrawTexturePro(assets[6], srcRect, destRect, origin, quad * 90, {255, 255, 255, 235});
+                }
+            }
         }
     }
 
