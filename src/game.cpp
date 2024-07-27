@@ -55,14 +55,28 @@ void Game::setup()
 
     const Vector2 positions[] = {
         {m_worldBounds.x / 2, m_worldBounds.y / 2},
-        {m_worldBounds.x / 2, (m_worldBounds.y - 20) / 2},
+        {m_worldBounds.x / 2, (m_worldBounds.y - 15) / 2},
+        {(m_worldBounds.x + 30) / 2, m_worldBounds.y / 2},
     };
     const int numBattalions = sizeof(positions) / sizeof(Vector2);
 
-    for (int i = 0; i < numBattalions; i++)
-    {
-        m_battalions.push_back(Battalion(std::weak_ptr<Battalion>(), 0, 0, 0, positions[i], 5, 0, B_Type::Warrior));
-    }
+    // for (int i = 0; i < numBattalions; i++)
+    // {
+    //     m_battalions.push_back(std::make_shared<Battalion>(0,  BType::Archer, positions[i], 5, 90));
+    // }
+
+    // TODO: Change Target of battalions to the nearest enemy
+
+    m_battalions.push_back(std::make_shared<Battalion>(1,  BType::Warrior, positions[0], 7, 90));
+    m_battalions.push_back(std::make_shared<Battalion>(0,  BType::Archer, positions[1], 5, 90));
+    m_battalions.push_back(std::make_shared<Battalion>(1,  BType::Archer, positions[2], 5, 90));
+  
+    m_battalions[0] -> setColor(PURPLE);
+
+    m_battalions[0] -> setTarget(m_battalions[1]);
+    m_battalions[1] -> setTarget(m_battalions[0]);
+    m_battalions[2] -> setTarget(m_battalions[0]);
+
 
     m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
     m_cloudTexture = WorldGen::createCloudTexture();
@@ -84,6 +98,11 @@ void Game::drawFrame()
 
     drawCloud(Lerp(20, 40, 1 - alphaT));
     EndMode2D();
+
+    for (auto &b : m_battalions)
+    {
+        b -> update();
+    }
 
     const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
     DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
@@ -131,10 +150,10 @@ void Game::processCameraInputs()
 
 void Game::setBattalionColor(Color color)
 {
-    for (Battalion &b : m_battalions)
-    {
-        b.setColor(color);
-    }
+    // for (Battalion &b : m_battalions)
+    // {
+        // b.setColor(color);
+    // }
 }
 
 void Game::drawCloud(uint8_t alpha)
@@ -154,8 +173,8 @@ void Game::drawWorld()
 
 void Game::drawBattalions()
 {
-    for (Battalion &b : m_battalions)
+    for (auto &b : m_battalions)
     {
-        b.draw(m_camera);
+        b -> draw();
     }
 }

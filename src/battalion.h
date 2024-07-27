@@ -2,54 +2,61 @@
 
 #include <raylib/raylib.h>
 #include <memory>
-#include <vector>
 #include <raylib/raymath.h>
+#include <cstdlib> 
 
-enum class B_Type
+enum class BType
 {
     Archer = 0,
-    Warrior = 1
+    Warrior = 1,
 };
 
 class Battalion
 {
 
 public:
-    Battalion(
-        std::weak_ptr<Battalion> target,
-        int group,
-        float aggression,
-        float range,
-        Vector2 pos,
-        int init_size,
-        float damage,
-        B_Type type);
-
-    ~Battalion();
-
-    void draw(const Camera2D &cam);
-
-    void setDebugColor(Color color);
-
-    void update();
+    /// @param group attacker or defender
+    /// @param rotation user can spawn the battalion with rotation (maybe by default we can just point it towards the opponents palace)
+    Battalion(int group, BType btype, Vector2 position, int troopCount, float rotation);
+    /// @brief draws the battalion
+    /// @param debug show info abt battalion
+    void draw(bool debug = false) const;
+    /// @brief will check whether the battalion is alive and is inside the lookoutRange
+    bool hasValidTarget() const;
+    /// @brief change the target, could be the current group's palace (back to the og formation)
+    void setTarget(std::weak_ptr<Battalion> target);
 
     void setColor(Color color);
+    
+    void update();
 
 private:
+    /// @brief if the target is within attackRange, damage the target
+    void attackTarget();
+    /// @brief if the target is within lookoutRange and not within attackRange, move towards it
+    void moveTowardsTarget();
+    /// @brief describes the battalion
+    void debugDraw() const;
+    /// @brief increase speed, accuracy, and dodge when 10% of the troops die
     void enrage();
-    void attack();
-    void move();
-    void checkTarget();
-    bool isMouseHover(const Camera2D &cam) const; // New method
 
-    int m_group;
-    float m_aggression;
-    float m_range;
-    Vector2 m_position;
-    int m_size;
-    float m_damage;
-    B_Type m_type;
+private:
     std::weak_ptr<Battalion> m_target;
-    Color m_debugColor;
+    int m_group;
+    BType m_btype;
+    Vector2 m_position;
+    int m_initialTroopCount;
+    float m_currentTroopCount;
+    float m_agression = 1.0;
     float m_rotation;
+
+    int m_cooldown;
+    Color m_color = BLUE;
+    // Additional attributes
+    float m_attackRange;  // will be derived from btype and currentTroopCount
+    float m_lookoutRange; // will be derived from btype and currentTroopCount
+    float m_speed;        // will be derived from btype and currentTroopCount
+    float m_damage;       // will be derived from btype and currentTroopCount
+    float m_accuracy;     // accuracy percentage
+    float m_dodge;        // dodge percentage
 };
