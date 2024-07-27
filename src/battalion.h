@@ -3,7 +3,7 @@
 #include <raylib/raylib.h>
 #include <memory>
 #include <raylib/raymath.h>
-#include <cstdlib> 
+#include <cstdlib>
 
 enum class BType
 {
@@ -27,7 +27,7 @@ public:
     void setTarget(std::weak_ptr<Battalion> target);
 
     void setColor(Color color);
-    
+
     void update();
 
 private:
@@ -52,6 +52,7 @@ private:
 
     int m_cooldown;
     Color m_color = BLUE;
+
     // Additional attributes
     float m_attackRange;  // will be derived from btype and currentTroopCount
     float m_lookoutRange; // will be derived from btype and currentTroopCount

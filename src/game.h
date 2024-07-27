@@ -18,7 +18,6 @@ public:
 
 private:
     void setup();
-    void loadAssets();
     void drawFrame();
     void processInputs();
     void processCameraInputs();

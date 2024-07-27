@@ -18,7 +18,6 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     InitWindow(windowWidth, windowHeight, windowTitle);
 
     setup();
-    loadAssets();
 }
 
 Game::~Game()
@@ -67,24 +66,19 @@ void Game::setup()
 
     // TODO: Change Target of battalions to the nearest enemy
 
-    m_battalions.push_back(std::make_shared<Battalion>(1,  BType::Warrior, positions[0], 7, 90));
-    m_battalions.push_back(std::make_shared<Battalion>(0,  BType::Archer, positions[1], 5, 90));
-    m_battalions.push_back(std::make_shared<Battalion>(1,  BType::Archer, positions[2], 5, 90));
-  
-    m_battalions[0] -> setColor(PURPLE);
+    m_battalions.push_back(std::make_shared<Battalion>(1, BType::Warrior, positions[0], 7, 90));
+    m_battalions.push_back(std::make_shared<Battalion>(0, BType::Archer, positions[1], 5, 90));
+    m_battalions.push_back(std::make_shared<Battalion>(1, BType::Archer, positions[2], 5, 90));
 
-    m_battalions[0] -> setTarget(m_battalions[1]);
-    m_battalions[1] -> setTarget(m_battalions[0]);
-    m_battalions[2] -> setTarget(m_battalions[0]);
+    m_battalions[0]->setColor(PURPLE);
 
+    m_battalions[0]->setTarget(m_battalions[1]);
+    m_battalions[1]->setTarget(m_battalions[0]);
+    m_battalions[2]->setTarget(m_battalions[0]);
 
     m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
     m_cloudTexture = LoadTexture("assets/cloud_map.png");
     SetTextureWrap(m_cloudTexture, TEXTURE_WRAP_REPEAT);
-}
-
-void Game::loadAssets()
-{
 }
 
 void Game::drawFrame()
@@ -102,7 +96,7 @@ void Game::drawFrame()
 
     for (auto &b : m_battalions)
     {
-        b -> update();
+        b->update();
     }
 
     const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
@@ -153,7 +147,7 @@ void Game::setBattalionColor(Color color)
 {
     // for (Battalion &b : m_battalions)
     // {
-        // b.setColor(color);
+    // b.setColor(color);
     // }
 }
 
@@ -176,6 +170,6 @@ void Game::drawBattalions()
 {
     for (auto &b : m_battalions)
     {
-        b -> draw();
+        b->draw();
     }
 }

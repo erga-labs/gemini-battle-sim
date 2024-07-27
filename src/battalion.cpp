@@ -18,8 +18,6 @@ Battalion::Battalion(
     m_cooldown = (btype == BType::Archer) ? 60 : 30;
 }
 
-
-
 void Battalion::draw(bool debug) const
 {
     Color colorToDraw = debug ? RED : m_color;
@@ -80,9 +78,8 @@ void Battalion::attackTarget()
     }
 }
 
-void Battalion::update(){
-    
-
+void Battalion::update()
+{
 
     m_cooldown--;
     if (m_cooldown <= 0 && m_currentTroopCount > 0)
@@ -91,12 +88,9 @@ void Battalion::update(){
         m_cooldown = (m_btype == BType::Archer) ? 60 : 30;
     }
 
-
-
     moveTowardsTarget();
     enrage();
 }
-
 
 void Battalion::moveTowardsTarget()
 {
@@ -109,7 +103,7 @@ void Battalion::moveTowardsTarget()
         {
             if (distance <= m_attackRange)
             {
-                return;   // Do nothing, just attack
+                return; // Do nothing, just attack
             }
             Vector2 direction = Vector2Subtract(target->m_position, m_position);
             if (Vector2Length(direction) > 0)
