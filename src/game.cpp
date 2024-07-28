@@ -5,7 +5,7 @@
 #include <raylib/raymath.h>
 
 const float minZoom = 15;
-const float maxZoom = 30;
+const float maxZoom = 40;
 
 void emscriptenMainLoop(void *arg)
 {

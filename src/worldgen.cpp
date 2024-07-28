@@ -41,16 +41,22 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     // how crisp the texture is (16 is a good number for now)
     const float crispFactor = 16;
 
-    Texture assets[] = {
-        LoadTexture("assets/dirt_1.png"),
-        LoadTexture("assets/dirt_2.png"),
-        LoadTexture("assets/weeded_grass_1.png"),
-        LoadTexture("assets/weeded_grass_2.png"),
-        LoadTexture("assets/grass_1.png"),
-        LoadTexture("assets/grass_2.png"),
-        LoadTexture("assets/grass_overlay.png"),
+    Texture spriteSheet = LoadTexture("assets/spritesheet-ai.png");
+    SetTextureFilter(spriteSheet, TEXTURE_FILTER_POINT);
+
+    // dirt texture: 0 to 1
+    // weed texture: 2 to 3
+    // grass texture: 4 to 5
+    // grass overlay: 6
+    const Rectangle srcRects[] = {
+        {0, 32, 16, 16},
+        {16, 32, 16, 16},
+        {0, 16, 16, 16},
+        {16, 16, 16, 16},
+        {0, 0, 16, 16},
+        {16, 0, 16, 16},
+        {0, 48, 16, 16},
     };
-    const int numAssets = sizeof(assets) / sizeof(Texture);
 
     const std::vector<Tile> worldData = createWorld(boundX, boundY);
     // the world will be drawn into this
@@ -62,12 +68,17 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     {
         for (int x = 0; x < boundX; x++)
         {
+            // const Tile tile = worldData[x + y * boundX];
+            // const int texIndex = GetRandomValue((int)tile * 2, (int)tile * 2 + 1);
+            // const Texture tex = assets[texIndex];
+            // const Rectangle srcRect = {0, 0, (float)tex.width, (float)tex.height};
+            // const Rectangle destRect = {x * crispFactor, y * crispFactor, crispFactor, crispFactor};
+            // DrawTexturePro(tex, srcRect, destRect, {0, 0}, 0, WHITE);
+
             const Tile tile = worldData[x + y * boundX];
             const int texIndex = GetRandomValue((int)tile * 2, (int)tile * 2 + 1);
-            const Texture tex = assets[texIndex];
-            const Rectangle srcRect = {0, 0, (float)tex.width, (float)tex.height};
             const Rectangle destRect = {x * crispFactor, y * crispFactor, crispFactor, crispFactor};
-            DrawTexturePro(tex, srcRect, destRect, {0, 0}, 0, WHITE);
+            DrawTexturePro(spriteSheet, srcRects[texIndex], destRect, {0, 0}, 0, WHITE);
 
             if (tile == Tile::Dirt)
             {
@@ -89,7 +100,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
                     const float originY = (quad == 1 || quad == 2) ? 1 : 0;
                     const Vector2 origin = {originX * crispFactor, originY * crispFactor};
 
-                    DrawTexturePro(assets[6], srcRect, destRect, origin, quad * 90, {255, 255, 255, 235});
+                    DrawTexturePro(spriteSheet, srcRects[6], destRect, origin, quad * 90, {255, 255, 255, 235});
                 }
             }
         }
@@ -98,13 +109,11 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     EndTextureMode();
 
     Texture out = renderTex.texture;
-    renderTex.texture.id = 0;
+    SetTextureFilter(out, TEXTURE_FILTER_POINT);
 
     // unloading stuff
-    for (int i = 0; i < numAssets; i++)
-    {
-        UnloadTexture(assets[i]);
-    }
+    UnloadTexture(spriteSheet);
+    renderTex.texture.id = 0;
     UnloadRenderTexture(renderTex);
 
     return out;
