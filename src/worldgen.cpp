@@ -3,7 +3,7 @@
 
 WorldGen::WorldGen()
 {
-    m_spriteSheet = LoadTexture("assets/spritesheet-ai.png");
+    m_spriteSheet = LoadTexture("assets/spritesheet.png");
     SetTextureFilter(m_spriteSheet, TEXTURE_FILTER_POINT);
 }
 
