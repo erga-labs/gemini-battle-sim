@@ -4,7 +4,7 @@
 #include <emscripten.h>
 #include <raylib/raymath.h>
 
-const float minZoom = 15;
+const float minZoom = 5;
 const float maxZoom = 40;
 
 void emscriptenMainLoop(void *arg)
@@ -79,9 +79,9 @@ void Game::setup()
     m_battalions[1]->setTarget(m_battalions[0]);
     m_battalions[2]->setTarget(m_battalions[0]);
 
-    m_worldTexture = WorldGen::createWorldTexture(m_worldBounds.x, m_worldBounds.y);
-    m_cloudTexture = LoadTexture("assets/cloud_map.png");
-    SetTextureWrap(m_cloudTexture, TEXTURE_WRAP_REPEAT);
+    WorldGen worldGen;
+    m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);
+    m_cloudTexture = worldGen.createCloudTexture();
 }
 
 void Game::drawFrame()

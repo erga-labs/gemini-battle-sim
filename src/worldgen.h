@@ -15,6 +15,14 @@ class WorldGen
 {
 
 public:
-    static std::vector<Tile> createWorld(int boundX, int boundY);
-    static Texture createWorldTexture(int boundX, int boundY);
+    WorldGen();
+    ~WorldGen();
+    Texture createWorldTexture(int boundX, int boundY);
+    Texture createCloudTexture();
+
+private:
+    std::vector<Tile> createWorld(int boundX, int boundY);
+
+private:
+    Texture m_spriteSheet;
 };

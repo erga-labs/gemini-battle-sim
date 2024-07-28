@@ -1,48 +1,21 @@
 
 #include "worldgen.h"
 
-std::vector<Tile> WorldGen::createWorld(int boundX, int boundY)
+WorldGen::WorldGen()
 {
-    // creating a vec of fixed size
-    std::vector<Tile> tiles(boundX * boundY);
+    m_spriteSheet = LoadTexture("assets/spritesheet-ai.png");
+    SetTextureFilter(m_spriteSheet, TEXTURE_FILTER_POINT);
+}
 
-    const int offset = GetRandomValue(0, 100) * 100;
-    Image noiseImage = GenImagePerlinNoise(boundX, boundY, offset, offset, 3);
-    Color *noiseData = (Color *)noiseImage.data;
-
-    for (int y = 0; y < boundY; y++)
-    {
-        for (int x = 0; x < boundX; x++)
-        {
-            const float val = noiseData[x + y * boundX].r / 255.0f;
-            Tile tile;
-            if (val < 0.3)
-            {
-                tile = Tile::Dirt;
-            }
-            else if (val < 0.7)
-            {
-                tile = Tile::Weed;
-            }
-            else
-            {
-                tile = Tile::Grass;
-            }
-            tiles[x + y * boundX] = tile;
-        }
-    }
-
-    UnloadImage(noiseImage);
-    return tiles;
+WorldGen::~WorldGen()
+{
+    UnloadTexture(m_spriteSheet);
 }
 
 Texture WorldGen::createWorldTexture(int boundX, int boundY)
 {
     // how crisp the texture is (16 is a good number for now)
     const float crispFactor = 16;
-
-    Texture spriteSheet = LoadTexture("assets/spritesheet-ai.png");
-    SetTextureFilter(spriteSheet, TEXTURE_FILTER_POINT);
 
     // dirt texture: 0 to 1
     // weed texture: 2 to 3
@@ -78,7 +51,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
             const Tile tile = worldData[x + y * boundX];
             const int texIndex = GetRandomValue((int)tile * 2, (int)tile * 2 + 1);
             const Rectangle destRect = {x * crispFactor, y * crispFactor, crispFactor, crispFactor};
-            DrawTexturePro(spriteSheet, srcRects[texIndex], destRect, {0, 0}, 0, WHITE);
+            DrawTexturePro(m_spriteSheet, srcRects[texIndex], destRect, {0, 0}, 0, WHITE);
 
             if (tile == Tile::Dirt)
             {
@@ -100,7 +73,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
                     const float originY = (quad == 1 || quad == 2) ? 1 : 0;
                     const Vector2 origin = {originX * crispFactor, originY * crispFactor};
 
-                    DrawTexturePro(spriteSheet, srcRects[6], destRect, origin, quad * 90, {255, 255, 255, 235});
+                    DrawTexturePro(m_spriteSheet, srcRects[6], destRect, origin, quad * 90, {255, 255, 255, 235});
                 }
             }
         }
@@ -112,9 +85,63 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     SetTextureFilter(out, TEXTURE_FILTER_POINT);
 
     // unloading stuff
-    UnloadTexture(spriteSheet);
     renderTex.texture.id = 0;
     UnloadRenderTexture(renderTex);
 
     return out;
+}
+
+Texture WorldGen::createCloudTexture()
+{
+    // Have to load a render texture of some power of 2 since wrapping is not supported for NPOT in gles 2.0
+    RenderTexture renderTex = LoadRenderTexture(256, 128);
+    TraceLog(LOG_WARNING, "created renderTex: %d %d", renderTex.id, renderTex.texture.id);
+
+    BeginTextureMode(renderTex);
+    DrawTexturePro(m_spriteSheet, {0, 167, 224, 100}, {0, 0, 256, 128}, {0, 0}, 0, WHITE);
+    EndTextureMode();
+
+    Texture out = renderTex.texture;
+    SetTextureFilter(out, TEXTURE_FILTER_POINT);
+    SetTextureWrap(out, TEXTURE_WRAP_REPEAT);
+
+    renderTex.texture.id = 0;
+    UnloadRenderTexture(renderTex);
+
+    return out;
+}
+
+std::vector<Tile> WorldGen::createWorld(int boundX, int boundY)
+{
+    // creating a vec of fixed size
+    std::vector<Tile> tiles(boundX * boundY);
+
+    const int offset = GetRandomValue(0, 100) * 100;
+    Image noiseImage = GenImagePerlinNoise(boundX, boundY, offset, offset, 3);
+    Color *noiseData = (Color *)noiseImage.data;
+
+    for (int y = 0; y < boundY; y++)
+    {
+        for (int x = 0; x < boundX; x++)
+        {
+            const float val = noiseData[x + y * boundX].r / 255.0f;
+            Tile tile;
+            if (val < 0.3)
+            {
+                tile = Tile::Dirt;
+            }
+            else if (val < 0.7)
+            {
+                tile = Tile::Weed;
+            }
+            else
+            {
+                tile = Tile::Grass;
+            }
+            tiles[x + y * boundX] = tile;
+        }
+    }
+
+    UnloadImage(noiseImage);
+    return tiles;
 }
