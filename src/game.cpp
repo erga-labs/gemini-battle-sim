@@ -1,11 +1,31 @@
 
 #include "src/game.h"
 #include "src/worldgen.h"
-#include <emscripten.h>
 #include <raylib/raymath.h>
+#include <emscripten.h>
+#include <emscripten/val.h>
 
-const float minZoom = 5;
+using namespace emscripten;
+
+const float minZoom = 10;
 const float maxZoom = 40;
+
+EM_ASYNC_JS(EM_VAL, myFunction, (), {
+    const url = "/api/gemini";
+    const response = await fetch(url, {
+        method : 'POST',
+        headers : {
+            "Authorization" : "Bearer yoursecretkey",
+        },
+        body : JSON.stringify({
+            prompt : "How to travel to moon via walking",
+        }),
+    });
+    const json = await response.json();
+    console.log("Response:", response);
+    console.log("Json:", json);
+    return Emval.toHandle(json);
+});
 
 void emscriptenMainLoop(void *arg)
 {
@@ -127,6 +147,13 @@ void Game::processInputs()
     const Vector2 minCamPos = camPadding;
     const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
     m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
+
+    if (IsKeyPressed(KEY_SPACE))
+    {
+        auto obj = val::take_ownership(myFunction());
+        std::string res = obj["response"].as<std::string>();
+        TraceLog(LOG_WARNING, "c++: we got %s", res.c_str());
+    }
 }
 
 void Game::drawCloud(uint8_t alpha)
