@@ -165,7 +165,7 @@ void Game::processInputs()
 void Game::drawCloud(uint8_t alpha)
 {
     const Rectangle srcRect = {m_cloudDrawOffset, 0, (float)m_cloudTexture.width / 2.0f, (float)m_cloudTexture.height};
-    const Rectangle destRect = {-15, -15, m_worldBounds.x + 30, m_worldBounds.y + 30};
+    const Rectangle destRect = {-20, -20, m_worldBounds.x + 40, m_worldBounds.y + 40};
     DrawTexturePro(m_cloudTexture, srcRect, destRect, {0, 0}, 0, {255, 255, 255, alpha});
 }
 
