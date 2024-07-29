@@ -10,21 +10,16 @@ using namespace emscripten;
 const float minZoom = 10;
 const float maxZoom = 40;
 
-EM_ASYNC_JS(EM_VAL, myFunction, (), {
-    const url = "/api/gemini";
-    const response = await fetch(url, {
-        method : 'POST',
-        headers : {
-            "Authorization" : "Bearer yoursecretkey",
-        },
-        body : JSON.stringify({
-            prompt : "How to travel to moon via walking",
-        }),
-    });
-    const json = await response.json();
-    console.log("Response:", response);
-    console.log("Json:", json);
-    return Emval.toHandle(json);
+EM_JS(bool, callGeminiApi, (const char *prompt), {
+    return Module.callGeminiApi(UTF8ToString(prompt));
+});
+
+EM_JS(bool, hasApiResponse, (), {
+    return Module.hasApiResponse();
+});
+
+EM_JS(EM_VAL, getApiResponse, (), {
+    return Emval.toHandle(Module.getApiResponse());
 });
 
 void emscriptenMainLoop(void *arg)
@@ -148,11 +143,22 @@ void Game::processInputs()
     const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
     m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
 
+    static bool apiCalled = false;
+
     if (IsKeyPressed(KEY_SPACE))
     {
-        auto obj = val::take_ownership(myFunction());
-        std::string res = obj["response"].as<std::string>();
-        TraceLog(LOG_WARNING, "c++: we got %s", res.c_str());
+        std::string prompt = "How to go to a game world";
+        TraceLog(LOG_WARNING, "Prompt: %s", prompt.c_str());
+        callGeminiApi(prompt.c_str());
+        apiCalled = true;
+    }
+
+    if (apiCalled && hasApiResponse())
+    {
+        apiCalled = false;
+        auto response = val::take_ownership(getApiResponse());
+        std::string promptResp = response["response"].as<std::string>();
+        TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
     }
 }
 
