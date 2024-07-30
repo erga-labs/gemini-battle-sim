@@ -22,21 +22,27 @@ Battalion::Battalion(
 void Battalion::draw(bool debug) const
 {
     Color colorToDraw = debug ? RED : m_color;
+
+    // Draw the center point (optional, for visualization purposes)
     DrawCircleV(m_position, 1, RED);
+
     DrawRectanglePro(
         {m_position.x, m_position.y, float(m_currentTroopCount), 1}, // Rectangle
-        {m_currentTroopCount / 2.0f, m_currentTroopCount / 2.0f},
+        {float(m_currentTroopCount) / 2.0f, 0.5f}, // Origin point 
         m_rotation, // Rotation angle
         colorToDraw);
 
+    // Draw attack and lookout ranges
     DrawCircleV(m_position, m_attackRange, {0, 0, 255, 100});
     DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 50});
 
+    // Draw debug info if enabled
     if (debug)
     {
         debugDraw();
     }
 }
+
 
 void Battalion::setColor(Color color)
 {
