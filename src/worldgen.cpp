@@ -95,10 +95,9 @@ Texture WorldGen::createCloudTexture()
 {
     // Have to load a render texture of some power of 2 since wrapping is not supported for NPOT in gles 2.0
     RenderTexture renderTex = LoadRenderTexture(256, 128);
-    TraceLog(LOG_WARNING, "created renderTex: %d %d", renderTex.id, renderTex.texture.id);
 
     BeginTextureMode(renderTex);
-    DrawTexturePro(m_spriteSheet, {0, 167, 224, 100}, {0, 0, 256, 128}, {0, 0}, 0, WHITE);
+    DrawTexturePro(m_spriteSheet, {0, 167, 224, 100}, {0, 0, 256, 128}, {256, 128}, 180, WHITE);
     EndTextureMode();
 
     Texture out = renderTex.texture;
