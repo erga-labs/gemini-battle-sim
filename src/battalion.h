@@ -11,13 +11,19 @@ enum class BType
     Warrior = 1,
 };
 
+enum class Group
+{
+    Attacker = 0,
+    Defender = 1,
+};
+
 class Battalion
 {
 
 public:
     /// @param group attacker or defender
     /// @param rotation user can spawn the battalion with rotation (maybe by default we can just point it towards the opponents palace)
-    Battalion(int group, BType btype, Vector2 position, int troopCount, float rotation);
+    Battalion(Group group, BType btype, Vector2 position, int troopCount, float rotation);
     /// @brief draws the battalion
     /// @param debug show info abt battalion
     void draw(bool debug = false) const;
@@ -42,7 +48,7 @@ private:
 
 private:
     std::weak_ptr<Battalion> m_target;
-    int m_group;
+    Group m_group;
     BType m_btype;
     Vector2 m_position;
     int m_initialTroopCount;
@@ -60,4 +66,6 @@ private:
     float m_damage;       // will be derived from btype and currentTroopCount
     float m_accuracy;     // accuracy percentage
     float m_dodge;        // dodge percentage
+
+    friend class BattalionHandler;
 };

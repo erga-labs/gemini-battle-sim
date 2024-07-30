@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "src/battalion.h"
+#include "src/battalionhandler.h"
 #include <raylib/raylib.h>
 #include <vector>
 #include <memory>
@@ -26,14 +26,12 @@ private:
     void drawCloud(uint8_t alpha);
     // draw the actual world
     void drawWorld();
-    // draw the battalions
-    void drawBattalions();
 
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
 
-    std::vector<std::shared_ptr<Battalion>> m_battalions;
+    BattalionHandler m_battalionHandler;
 
     float m_cloudDrawOffset = 0.0;
     // created by `WorldGen`

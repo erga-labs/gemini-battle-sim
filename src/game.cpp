@@ -50,6 +50,9 @@ void Game::startGameLoop()
 void Game::processFrame()
 {
     m_cloudDrawOffset += 0.07;
+    m_battalionHandler.removeDead();
+    m_battalionHandler.updateTargets();
+    m_battalionHandler.updateAll();
 
     BeginDrawing();
     ClearBackground(ColorBrightness(BLUE, 0.2));
@@ -84,15 +87,28 @@ void Game::setup()
 
     // TODO: Change Target of battalions to the nearest enemy
 
-    m_battalions.push_back(std::make_shared<Battalion>(1, BType::Warrior, positions[0], 7, 90));
-    m_battalions.push_back(std::make_shared<Battalion>(0, BType::Archer, positions[1], 5, 90));
-    m_battalions.push_back(std::make_shared<Battalion>(1, BType::Archer, positions[2], 5, 90));
+    // m_battalions.push_back(std::make_shared<Battalion>(Group::Attacker, BType::Warrior, positions[0], 7, 90));
+    // m_battalions.push_back(std::make_shared<Battalion>(Group::Defender, BType::Archer, positions[1], 5, 90));
+    // m_battalions.push_back(std::make_shared<Battalion>(Group::Attacker, BType::Archer, positions[2], 5, 90));
 
-    m_battalions[0]->setColor(PURPLE);
+    // m_battalions[0]->setColor(PURPLE);
 
-    m_battalions[0]->setTarget(m_battalions[1]);
-    m_battalions[1]->setTarget(m_battalions[0]);
-    m_battalions[2]->setTarget(m_battalions[0]);
+    // m_battalions[0]->setTarget(m_battalions[1]);
+    // m_battalions[1]->setTarget(m_battalions[0]);
+    // m_battalions[2]->setTarget(m_battalions[0]);
+
+    std::vector<BattalionSpawnInfo> attackerBattalions = {
+        {.position = positions[0], .btype = BType::Warrior, .troopCount = 7},
+    };
+    std::vector<BattalionSpawnInfo> defenderBattalions = {
+        {.position = positions[1], .btype = BType::Archer, .troopCount = 5},
+        {.position = positions[2], .btype = BType::Archer, .troopCount = 5},
+    };
+
+    m_battalionHandler.spawn(Group::Attacker, attackerBattalions);
+    m_battalionHandler.spawn(Group::Defender, defenderBattalions);
+
+    m_battalionHandler.details();
 
     WorldGen worldGen;
     m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);
@@ -104,7 +120,7 @@ void Game::drawFrame()
     BeginMode2D(m_camera);
     drawCloud(220);
     drawWorld();
-    drawBattalions();
+    m_battalionHandler.drawAll();
 
     // zooming in increases opacity
     const float cameraZoomRange = maxZoom - minZoom;
@@ -112,11 +128,6 @@ void Game::drawFrame()
     drawCloud(Lerp(20, 40, 1 - alphaT));
 
     EndMode2D();
-
-    for (auto &b : m_battalions)
-    {
-        b->update();
-    }
 
     const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
     DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
@@ -175,12 +186,4 @@ void Game::drawWorld()
     const Rectangle destRect = {0, 0, m_worldBounds.x, m_worldBounds.y};
     const Vector2 origin = {m_worldBounds.x, m_worldBounds.y};
     DrawTexturePro(m_worldTexture, srcRect, destRect, origin, 180, WHITE);
-}
-
-void Game::drawBattalions()
-{
-    for (auto &b : m_battalions)
-    {
-        b->draw();
-    }
 }

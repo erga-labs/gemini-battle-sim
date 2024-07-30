@@ -1,7 +1,7 @@
 #include "battalion.h"
 
 Battalion::Battalion(
-    int group,
+    Group group,
     BType btype,
     Vector2 position,
     int troopCount,
@@ -27,6 +27,9 @@ void Battalion::draw(bool debug) const
         {m_currentTroopCount / 2.0f, m_currentTroopCount / 2.0f},
         m_rotation, // Rotation angle
         colorToDraw);
+
+    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 100});
+    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 50});
 
     if (debug)
     {
@@ -70,6 +73,7 @@ void Battalion::attackTarget()
             // Calculate if the attack hits based on accuracy
             if ((float)rand() / RAND_MAX <= m_accuracy)
             {
+                TraceLog(LOG_WARNING, "Group: %s | attackTarget", (m_group == Group::Attacker) ? "Attacker" : "Defender");
                 target->m_currentTroopCount -= 1.0f;
                 if (target->m_currentTroopCount < 0)
                     target->m_currentTroopCount = 0;
