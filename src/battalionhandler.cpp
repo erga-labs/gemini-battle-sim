@@ -1,6 +1,7 @@
 
 #include "src/battalionhandler.h"
 #include <algorithm>
+#include <sstream>
 
 void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos)
 {
@@ -8,7 +9,7 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
     for (const BattalionSpawnInfo &info : spawnInfos)
     {
-        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(group, info.btype, info.position, info.troopCount, 0);
+        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, info.btype, info.position, info.troopCount, 0);
         vec.push_back(battalion);
     }
 }
@@ -74,6 +75,30 @@ void BattalionHandler::removeDead()
     vec->erase(it2, vec->end());
 }
 
+void BattalionHandler::printDetails() const
+{
+    std::stringstream stream;
+    stream << "Overview\n";
+
+    stream << "--- Group: Attacker ---\n";
+    for (const auto &b : m_attackerBattalions)
+    {
+        stream << " Id: " << b->m_id;
+        stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
+        stream << " TroopCount: " << b->m_initialTroopCount << "\n";
+    }
+
+    stream << "--- Group: Defender ---\n";
+    for (const auto &b : m_defenderBattalions)
+    {
+        stream << " Id: " << b->m_id;
+        stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
+        stream << " TroopCount: " << b->m_initialTroopCount << "\n";
+    }
+
+    TraceLog(LOG_WARNING, "%s", stream.str().c_str());
+}
+
 std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion> battalion) const
 {
 
@@ -82,7 +107,7 @@ std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion
     std::shared_ptr<Battalion> newTarget;
     float closestDistance = std::numeric_limits<float>::max();
 
-    for (const auto &other : m_defenderBattalions)
+    for (const auto &other : vec)
     {
         const float distance = Vector2Distance(battalion->m_position, other->m_position);
         if (distance < closestDistance)

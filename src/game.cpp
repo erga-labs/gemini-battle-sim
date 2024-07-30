@@ -78,37 +78,19 @@ void Game::setup()
         {m_worldBounds.x / 2, (m_worldBounds.y - 15) / 2},
         {(m_worldBounds.x + 30) / 2, m_worldBounds.y / 2},
     };
-    const int numBattalions = sizeof(positions) / sizeof(Vector2);
-
-    // for (int i = 0; i < numBattalions; i++)
-    // {
-    //     m_battalions.push_back(std::make_shared<Battalion>(0,  BType::Archer, positions[i], 5, 90));
-    // }
-
-    // TODO: Change Target of battalions to the nearest enemy
-
-    // m_battalions.push_back(std::make_shared<Battalion>(Group::Attacker, BType::Warrior, positions[0], 7, 90));
-    // m_battalions.push_back(std::make_shared<Battalion>(Group::Defender, BType::Archer, positions[1], 5, 90));
-    // m_battalions.push_back(std::make_shared<Battalion>(Group::Attacker, BType::Archer, positions[2], 5, 90));
-
-    // m_battalions[0]->setColor(PURPLE);
-
-    // m_battalions[0]->setTarget(m_battalions[1]);
-    // m_battalions[1]->setTarget(m_battalions[0]);
-    // m_battalions[2]->setTarget(m_battalions[0]);
 
     std::vector<BattalionSpawnInfo> attackerBattalions = {
-        {.position = positions[0], .btype = BType::Warrior, .troopCount = 7},
+        {.id = 1, .position = positions[0], .btype = BType::Warrior, .troopCount = 7},
     };
     std::vector<BattalionSpawnInfo> defenderBattalions = {
-        {.position = positions[1], .btype = BType::Archer, .troopCount = 5},
-        {.position = positions[2], .btype = BType::Archer, .troopCount = 5},
+        {.id = 2, .position = positions[1], .btype = BType::Archer, .troopCount = 5},
+        {.id = 3, .position = positions[2], .btype = BType::Archer, .troopCount = 5},
     };
 
     m_battalionHandler.spawn(Group::Attacker, attackerBattalions);
     m_battalionHandler.spawn(Group::Defender, defenderBattalions);
 
-    m_battalionHandler.details();
+    m_battalionHandler.printDetails();
 
     WorldGen worldGen;
     m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);

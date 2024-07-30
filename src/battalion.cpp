@@ -1,11 +1,12 @@
 #include "battalion.h"
 
 Battalion::Battalion(
+    int id,
     Group group,
     BType btype,
     Vector2 position,
     int troopCount,
-    float rotation) : m_group(group), m_btype(btype), m_position(position),
+    float rotation) : m_id(id), m_group(group), m_btype(btype), m_position(position),
                       m_initialTroopCount(troopCount), m_currentTroopCount(troopCount),
                       m_rotation(rotation)
 {
@@ -73,7 +74,7 @@ void Battalion::attackTarget()
             // Calculate if the attack hits based on accuracy
             if ((float)rand() / RAND_MAX <= m_accuracy)
             {
-                TraceLog(LOG_WARNING, "Group: %s | attackTarget", (m_group == Group::Attacker) ? "Attacker" : "Defender");
+                TraceLog(LOG_WARNING, "%d attacks %d", m_id, target->m_id);
                 target->m_currentTroopCount -= 1.0f;
                 if (target->m_currentTroopCount < 0)
                     target->m_currentTroopCount = 0;

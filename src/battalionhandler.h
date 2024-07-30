@@ -7,6 +7,7 @@
 
 struct BattalionSpawnInfo
 {
+    int id;
     Vector2 position;
     BType btype;
     int troopCount;
@@ -26,6 +27,8 @@ public:
     void updateTargets();
     /// @brief removes battalions that are dead
     void removeDead();
+    /// @brief gives an overview of the battalions
+    void printDetails() const;
 
 private:
     /// @brief get the target for the battalion provided
