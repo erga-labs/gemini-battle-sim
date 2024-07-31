@@ -28,8 +28,8 @@ void Battalion::draw(bool debug) const
 
     DrawRectanglePro(
         {m_position.x, m_position.y, float(m_currentTroopCount), 1}, // Rectangle
-        {float(m_currentTroopCount) / 2.0f, 0.5f}, // Origin point 
-        m_rotation, // Rotation angle
+        {float(m_currentTroopCount) / 2.0f, 0.5f},                   // Origin point
+        m_rotation,                                                  // Rotation angle
         colorToDraw);
 
     // Draw attack and lookout ranges
@@ -42,7 +42,6 @@ void Battalion::draw(bool debug) const
         debugDraw();
     }
 }
-
 
 void Battalion::setColor(Color color)
 {
@@ -100,7 +99,7 @@ void Battalion::update()
     }
 
     moveTowardsTarget();
-    enrage();
+    // enrage();
 }
 
 void Battalion::moveTowardsTarget()
@@ -116,12 +115,12 @@ void Battalion::moveTowardsTarget()
             {
                 return; // Do nothing, just attack
             }
-            Vector2 direction = Vector2Subtract(target->m_position, m_position);
-            if (Vector2Length(direction) > 0)
-            {
-                direction = Vector2Normalize(direction);
-                m_position = Vector2Add(m_position, Vector2Scale(direction, m_speed * deltaTime));
 
+            m_position = Vector2MoveTowards(m_position, target->m_position, m_speed * deltaTime);
+
+            const Vector2 direction = Vector2Subtract(target->m_position, m_position);
+            if (Vector2Length(direction) > 0.0)
+            {
                 m_rotation = atan2f(direction.y, direction.x) * RAD2DEG;
             }
         }

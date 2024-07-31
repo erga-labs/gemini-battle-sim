@@ -153,6 +153,11 @@ void Game::processInputs()
         std::string promptResp = response["response"].as<std::string>();
         TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
     }
+
+    if (IsKeyPressed(KEY_X))
+    {
+        m_battalionHandler.printDetails();
+    }
 }
 
 void Game::drawCloud(uint8_t alpha)

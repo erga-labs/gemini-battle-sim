@@ -85,7 +85,9 @@ void BattalionHandler::printDetails() const
     {
         stream << " Id: " << b->m_id;
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
-        stream << " TroopCount: " << b->m_initialTroopCount << "\n";
+        stream << " TroopCount: " << b->m_currentTroopCount;
+        stream << " Position: " << b->m_position.x << " " << b->m_position.y;
+        stream << "\n";
     }
 
     stream << "--- Group: Defender ---\n";
@@ -93,7 +95,9 @@ void BattalionHandler::printDetails() const
     {
         stream << " Id: " << b->m_id;
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
-        stream << " TroopCount: " << b->m_initialTroopCount << "\n";
+        stream << " TroopCount: " << b->m_currentTroopCount;
+        stream << " Position: " << b->m_position.x << " " << b->m_position.y;
+        stream << "\n";
     }
 
     TraceLog(LOG_WARNING, "%s", stream.str().c_str());
