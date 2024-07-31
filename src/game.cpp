@@ -77,14 +77,16 @@ void Game::setup()
         {m_worldBounds.x / 2, m_worldBounds.y / 2},
         {m_worldBounds.x / 2, (m_worldBounds.y - 15) / 2},
         {(m_worldBounds.x + 30) / 2, m_worldBounds.y / 2},
+        {(m_worldBounds.x + 40) / 2, m_worldBounds.y / 2},
     };
 
     std::vector<BattalionSpawnInfo> attackerBattalions = {
         {.id = 1, .position = positions[0], .btype = BType::Warrior, .troopCount = 7},
+        {.id = 1, .position = positions[1], .btype = BType::Archer, .troopCount = 4},
     };
     std::vector<BattalionSpawnInfo> defenderBattalions = {
-        {.id = 2, .position = positions[1], .btype = BType::Archer, .troopCount = 5},
-        {.id = 3, .position = positions[2], .btype = BType::Archer, .troopCount = 5},
+        {.id = 2, .position = positions[2], .btype = BType::Warrior, .troopCount = 5},
+        {.id = 3, .position = positions[3], .btype = BType::Archer, .troopCount = 5},
     };
 
     m_battalionHandler.spawn(Group::Attacker, attackerBattalions);

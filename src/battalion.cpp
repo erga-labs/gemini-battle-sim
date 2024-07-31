@@ -17,38 +17,27 @@ Battalion::Battalion(
     m_damage = (btype == BType::Archer) ? 10.0f : 15.0f;
     m_accuracy = (btype == BType::Archer) ? 0.6f : 0.6f; // 75% for Archers, 60% for Warriors
     m_cooldown = (btype == BType::Archer) ? 60 : 30;
-}
 
-void Battalion::draw(bool debug) const
-{
-    Color colorToDraw = debug ? RED : m_color;
-
-
-    DrawRectanglePro(
-        {m_position.x, m_position.y, float(m_currentTroopCount), 1}, // Rectangle
-        {float(m_currentTroopCount) / 2.0f, 0.5f},                   // Origin point
-        m_rotation,                                                  // Rotation angle
-        colorToDraw);
-
-    // Draw attack and lookout ranges
-    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 60});
-    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 40});
-
-    // Draw debug info if enabled
-    if (debug)
+    if (group == Group::Defender)
     {
-        debugDraw();
+        m_color = (btype == BType::Archer) ? Color{60, 20, 220, 255} : Color{0, 0, 140, 255};
+    }
+    else
+    {
+        m_color = (btype == BType::Archer) ? Color{220, 20, 60, 255} : Color{140, 0, 0, 255};
     }
 }
 
-void Battalion::setColor(Color color)
+void Battalion::draw() const
 {
-    m_color = color;
-}
+    const Rectangle rect = {m_position.x, m_position.y, m_currentTroopCount, 1.0};
+    const Vector2 origin = {m_currentTroopCount / 2.0f, 0.5};
 
-void Battalion::debugDraw() const
-{
-    DrawText(TextFormat("Troops: %d", (int)m_currentTroopCount), m_position.x, m_position.y - 20, 10, WHITE);
+    DrawRectanglePro(rect, origin, m_rotation, m_color);
+
+    // Draw attack and lookout ranges
+    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 40});
+    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 20});
 }
 
 bool Battalion::hasValidTarget() const

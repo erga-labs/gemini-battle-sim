@@ -26,14 +26,12 @@ public:
     Battalion(int id, Group group, BType btype, Vector2 position, int troopCount, float rotation);
     /// @brief draws the battalion
     /// @param debug show info abt battalion
-    void draw(bool debug = false) const;
+    void draw() const;
     /// @brief will check whether the battalion is alive and is inside the lookoutRange
     bool hasValidTarget() const;
     /// @brief change the target, could be the current group's palace (back to the og formation)
     void setTarget(std::weak_ptr<Battalion> target);
-
-    void setColor(Color color);
-
+    /// @brief calls moveTowardsTarget and attackTarget
     void update();
 
 private:
@@ -41,8 +39,6 @@ private:
     void attackTarget();
     /// @brief if the target is within lookoutRange and not within attackRange, move towards it
     void moveTowardsTarget();
-    /// @brief describes the battalion
-    void debugDraw() const;
     /// @brief increase speed, accuracy, and dodge when 10% of the troops die
     void enrage();
 
