@@ -15,7 +15,7 @@ Battalion::Battalion(
     m_lookoutRange = (btype == BType::Archer) ? 25.0f : 17.5f;
     m_speed = 5.0f; // * (10.0f / float(troopCount));
     m_damage = (btype == BType::Archer) ? 10.0f : 15.0f;
-    m_accuracy = (btype == BType::Archer) ? 0.6f : 0.75f; // 75% for Archers, 60% for Warriors
+    m_accuracy = (btype == BType::Archer) ? 0.6f : 0.6f; // 75% for Archers, 60% for Warriors
     m_cooldown = (btype == BType::Archer) ? 60 : 30;
 }
 
@@ -119,7 +119,7 @@ void Battalion::moveTowardsTarget()
             const Vector2 direction = Vector2Subtract(target->m_position, m_position);
             if (Vector2Length(direction) > 0.0)
             {
-                m_rotation = atan2f(direction.y, direction.x) * RAD2DEG;
+                m_rotation = (atan2f(direction.y, direction.x) * RAD2DEG) + 90.0f;
             }
         }
     }
