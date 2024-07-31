@@ -23,8 +23,6 @@ void Battalion::draw(bool debug) const
 {
     Color colorToDraw = debug ? RED : m_color;
 
-    // Draw the center point (optional, for visualization purposes)
-    DrawCircleV(m_position, 1, RED);
 
     DrawRectanglePro(
         {m_position.x, m_position.y, float(m_currentTroopCount), 1}, // Rectangle
@@ -33,8 +31,8 @@ void Battalion::draw(bool debug) const
         colorToDraw);
 
     // Draw attack and lookout ranges
-    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 100});
-    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 50});
+    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 60});
+    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 40});
 
     // Draw debug info if enabled
     if (debug)
