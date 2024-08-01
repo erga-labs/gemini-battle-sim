@@ -29,6 +29,8 @@ public:
     void removeDead();
     /// @brief gives an overview of the battalions
     void printDetails() const;
+    /// @brief returns the battalion at the specified position
+    std::shared_ptr<Battalion> getClosest(Vector2 position, float threshold) const;
 
 private:
     /// @brief get the target for the battalion provided

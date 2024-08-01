@@ -82,11 +82,11 @@ void Game::setup()
 
     std::vector<BattalionSpawnInfo> attackerBattalions = {
         {.id = 1, .position = positions[0], .btype = BType::Warrior, .troopCount = 7},
-        {.id = 1, .position = positions[1], .btype = BType::Archer, .troopCount = 4},
+        {.id = 2, .position = positions[1], .btype = BType::Archer, .troopCount = 4},
     };
     std::vector<BattalionSpawnInfo> defenderBattalions = {
-        {.id = 2, .position = positions[2], .btype = BType::Warrior, .troopCount = 5},
-        {.id = 3, .position = positions[3], .btype = BType::Archer, .troopCount = 5},
+        {.id = 3, .position = positions[2], .btype = BType::Warrior, .troopCount = 5},
+        {.id = 4, .position = positions[3], .btype = BType::Archer, .troopCount = 5},
     };
 
     m_battalionHandler.spawn(Group::Attacker, attackerBattalions);
@@ -116,6 +116,10 @@ void Game::drawFrame()
     const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
     DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
     DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
+    if (auto b = m_battalionHandler.getClosest(mousePos, 5.0))
+    {
+        DrawText(TextFormat("Closest battalion: %d", b->m_id), 10, 70, 20, BLACK);
+    }
 }
 
 void Game::processInputs()

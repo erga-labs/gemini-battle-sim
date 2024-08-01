@@ -65,4 +65,5 @@ private:
     float m_dodge;        // dodge percentage
 
     friend class BattalionHandler;
+    friend class Game;
 };

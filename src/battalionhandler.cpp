@@ -103,9 +103,36 @@ void BattalionHandler::printDetails() const
     TraceLog(LOG_WARNING, "%s", stream.str().c_str());
 }
 
+std::shared_ptr<Battalion> BattalionHandler::getClosest(Vector2 position, float threshold) const
+{
+    std::shared_ptr<Battalion> closest;
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (const auto &other : m_attackerBattalions)
+    {
+        const float distance = Vector2Distance(position, other->m_position);
+        if (distance < closestDistance)
+        {
+            closestDistance = distance;
+            closest = other;
+        }
+    }
+
+    for (const auto &other : m_defenderBattalions)
+    {
+        const float distance = Vector2Distance(position, other->m_position);
+        if (distance < closestDistance)
+        {
+            closestDistance = distance;
+            closest = other;
+        }
+    }
+
+    return (closestDistance < threshold) ? closest : std::shared_ptr<Battalion>();
+}
+
 std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion> battalion) const
 {
-
     const std::vector<std::shared_ptr<Battalion>> &vec = (battalion->m_group == Group::Attacker) ? m_defenderBattalions : m_attackerBattalions;
 
     std::shared_ptr<Battalion> newTarget;
