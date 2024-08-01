@@ -1,4 +1,4 @@
-# ant-sim-project
+# gemini-battle-sim
 
 ## Add an external folder with raylib.h, raymath.h, and libraylib.a
 
