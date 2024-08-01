@@ -109,7 +109,7 @@ void Game::drawFrame()
     // zooming in increases opacity
     const float cameraZoomRange = maxZoom - minZoom;
     const float alphaT = (m_camera.zoom - minZoom) / cameraZoomRange;
-    drawCloud(Lerp(20, 40, 1 - alphaT));
+    drawCloud(Lerp(20, 60, 1 - alphaT));
 
     EndMode2D();
 
