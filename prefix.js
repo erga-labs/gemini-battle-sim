@@ -27,7 +27,7 @@ Module.apiResult = {
 };
 
 
-Module.callGeminiApi = (string) => {
+Module.callGeminiApi = () => {
     if (Module.apiResult.ongoing) {
         return false;
     }
@@ -37,7 +37,24 @@ Module.callGeminiApi = (string) => {
         "Authorization": "Bearer yoursecretkey",
     };
     const body = {
-        prompt: string,
+        "gameState": {
+            "attackers": [
+                [[1, 2], [3], [100]],
+                [[4, 5], [2], [150]]
+            ],
+            "defenders": [
+                [[6, 7], [1], [200]],
+                [[8, 9], [3], [250]]
+            ],
+            "wall_health": [
+                [[10], [11]],
+                [[12], [13]]
+            ],
+            "last_moves": [
+                ["player", "ai"]
+            ],
+            "world_size": [20, 20]
+        }
     };
 
     fetch(postUrl, {

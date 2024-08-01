@@ -10,8 +10,8 @@ using namespace emscripten;
 const float minZoom = 10;
 const float maxZoom = 40;
 
-EM_JS(bool, callGeminiApi, (const char *prompt), {
-    return Module.callGeminiApi(UTF8ToString(prompt));
+EM_JS(bool, callGeminiApi, (), {
+    return Module.callGeminiApi();
 });
 
 EM_JS(bool, hasApiResponse, (), {
@@ -142,9 +142,7 @@ void Game::processInputs()
 
     if (IsKeyPressed(KEY_SPACE))
     {
-        std::string prompt = "How to go to a game world";
-        TraceLog(LOG_WARNING, "Prompt: %s", prompt.c_str());
-        callGeminiApi(prompt.c_str());
+        callGeminiApi();
         apiCalled = true;
     }
 
