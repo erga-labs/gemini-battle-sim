@@ -1,26 +1,12 @@
 
 #include "src/game.h"
 #include "src/worldgen.h"
+#include "src/js_functions.h"
 #include <raylib/raymath.h>
 #include <emscripten.h>
-#include <emscripten/val.h>
-
-using namespace emscripten;
 
 const float minZoom = 10;
 const float maxZoom = 40;
-
-EM_JS(bool, callGeminiApi, (), {
-    return Module.callGeminiApi();
-});
-
-EM_JS(bool, hasApiResponse, (), {
-    return Module.hasApiResponse();
-});
-
-EM_JS(EM_VAL, getApiResponse, (), {
-    return Emval.toHandle(Module.getApiResponse());
-});
 
 void emscriptenMainLoop(void *arg)
 {
@@ -49,10 +35,13 @@ void Game::startGameLoop()
 
 void Game::processFrame()
 {
-    m_cloudDrawOffset += 0.07;
-    m_battalionHandler.removeDead();
-    m_battalionHandler.updateTargets();
-    m_battalionHandler.updateAll();
+    if (m_state == State::RUN_SIMULATION)
+    {
+        m_cloudDrawOffset += 0.07;
+        m_battalionHandler.removeDead();
+        m_battalionHandler.updateTargets();
+        m_battalionHandler.updateAll();
+    }
 
     BeginDrawing();
     ClearBackground(ColorBrightness(BLUE, 0.2));
@@ -101,66 +90,89 @@ void Game::setup()
 
 void Game::drawFrame()
 {
-    BeginMode2D(m_camera);
-    drawCloud(220);
-    drawWorld();
-    m_battalionHandler.drawAll();
-
-    // zooming in increases opacity
-    const float cameraZoomRange = maxZoom - minZoom;
-    const float alphaT = (m_camera.zoom - minZoom) / cameraZoomRange;
-    drawCloud(Lerp(20, 60, 1 - alphaT));
-
-    EndMode2D();
-
-    const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
-    DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
-    DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
-    if (auto b = m_battalionHandler.getClosest(mousePos, 5.0))
+    if (m_state == State::LOADING)
     {
-        DrawText(TextFormat("Closest battalion: %d", b->m_id), 10, 70, 20, BLACK);
+        const char *text = "Waiting for user to set game state";
+        const int fontSize = 30;
+        const int textWidth = MeasureText(text, fontSize);
+        const Vector2 textSize = MeasureTextEx(GetFontDefault(), text, fontSize, fontSize / 10);
+
+        ClearBackground(BLACK);
+        DrawText(text, (GetScreenWidth() - textSize.x) / 2, (GetScreenHeight() - textSize.y) / 2, fontSize, RED);
+    }
+    else
+    {
+        BeginMode2D(m_camera);
+        drawCloud(220);
+        drawWorld();
+        m_battalionHandler.drawAll();
+
+        // zooming in increases opacity
+        const float cameraZoomRange = maxZoom - minZoom;
+        const float alphaT = (m_camera.zoom - minZoom) / cameraZoomRange;
+        drawCloud(Lerp(20, 60, 1 - alphaT));
+
+        EndMode2D();
+
+        const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
+        DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
+        DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
+        if (auto b = m_battalionHandler.getClosest(mousePos, 5.0))
+        {
+            DrawText(TextFormat("Closest battalion: %d", b->m_id), 10, 70, 20, BLACK);
+        }
     }
 }
 
 void Game::processInputs()
 {
-    const float zoomDelta = GetMouseWheelMove();
-    m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
-
-    Vector2 camMoveVec = {0, 0};
-    camMoveVec.x -= IsKeyDown(KEY_A);
-    camMoveVec.x += IsKeyDown(KEY_D);
-    camMoveVec.y -= IsKeyDown(KEY_W);
-    camMoveVec.y += IsKeyDown(KEY_S);
-    camMoveVec = Vector2Scale(camMoveVec, 10.0f / m_camera.zoom);
-    m_camera.target = Vector2Add(m_camera.target, camMoveVec);
-
-    Vector2 camPadding = {15, 15};
-    camPadding = Vector2Scale(camPadding, 1 / m_camera.zoom);
-    camPadding = Vector2Multiply(camPadding, {16, 9});
-    const Vector2 minCamPos = camPadding;
-    const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
-    m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
-
-    static bool apiCalled = false;
-
-    if (IsKeyPressed(KEY_SPACE))
+    if (m_state == State::LOADING)
     {
-        callGeminiApi();
-        apiCalled = true;
     }
-
-    if (apiCalled && hasApiResponse())
+    else
     {
-        apiCalled = false;
-        auto response = val::take_ownership(getApiResponse());
-        std::string promptResp = response["response"].as<std::string>();
-        TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
-    }
+        const float zoomDelta = GetMouseWheelMove();
+        m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
 
-    if (IsKeyPressed(KEY_X))
-    {
-        m_battalionHandler.printDetails();
+        Vector2 camMoveVec = {0, 0};
+        camMoveVec.x -= IsKeyDown(KEY_A);
+        camMoveVec.x += IsKeyDown(KEY_D);
+        camMoveVec.y -= IsKeyDown(KEY_W);
+        camMoveVec.y += IsKeyDown(KEY_S);
+        camMoveVec = Vector2Scale(camMoveVec, 10.0f / m_camera.zoom);
+        m_camera.target = Vector2Add(m_camera.target, camMoveVec);
+
+        Vector2 camPadding = {15, 15};
+        camPadding = Vector2Scale(camPadding, 1 / m_camera.zoom);
+        camPadding = Vector2Multiply(camPadding, {16, 9});
+        const Vector2 minCamPos = camPadding;
+        const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
+        m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
+
+        static bool apiCalled = false;
+
+        if (!apiCalled && IsKeyPressed(KEY_SPACE))
+        {
+            TraceLog(LOG_WARNING, "Calling gemini");
+            call_getGeminiResponse();
+            apiCalled = true;
+        }
+
+        if (apiCalled)
+        {
+            auto response = val::take_ownership(getGeminiResponse());
+            if (!response.isNull())
+            {
+                apiCalled = false;
+                std::string promptResp = response["response"].as<std::string>();
+                TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
+            }
+        }
+
+        if (IsKeyPressed(KEY_X))
+        {
+            m_battalionHandler.printDetails();
+        }
     }
 }
 

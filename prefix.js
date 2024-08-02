@@ -21,15 +21,12 @@ Module.onerror = (event) => {
 };
 
 
-Module.apiResult = {
-    ongoing: false,
-    result: null,
-};
+Module.geminiResponse = null;
 
-
-Module.callGeminiApi = () => {
-    if (Module.apiResult.ongoing) {
-        return false;
+Module.call_getGeminiResponse = (secretKey) => {
+    if (secretKey === "testSecretKey" && Module.geminiResponse !== null) {
+        console.error("BUG: Calling gemini api route even if one is ongoing");
+        return;
     }
 
     const postUrl = "/api/gemini";
@@ -64,26 +61,6 @@ Module.callGeminiApi = () => {
     })
     .then(async (response) => {
         const json = await response.json();
-        Module.apiResult.result = json;
-    })
-    .finally(() => {
-        Module.apiResult.ongoing = false;
+        Module.geminiResponse = json;
     });
-
-    Module.apiResult.ongoing = true;
-    return true;
-};
-
-
-Module.hasApiResponse = () => {
-    return !Module.apiResult.ongoing;
-};
-
-
-Module.getApiResponse = () => {
-    if (Module.apiResult.ongoing) {
-        return null;
-    }
-
-    return Module.apiResult.result;
 };

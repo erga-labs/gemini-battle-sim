@@ -10,6 +10,16 @@ class Game
 {
 
 public:
+    enum class State {
+        // while waiting for the user to set the initial config
+        LOADING = 0,
+        // simulation
+        RUN_SIMULATION = 1,
+        // simulation pause
+        PAUSE_SIMULATION = 2,
+    };
+
+public:
     Game(int windowWidth, int windowHeight, const char *windowTitle = "Ant Simulation");
     ~Game();
     void startGameLoop();
@@ -30,6 +40,7 @@ private:
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
+    State m_state = State::RUN_SIMULATION;
 
     BattalionHandler m_battalionHandler;
 
