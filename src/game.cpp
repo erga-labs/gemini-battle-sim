@@ -128,6 +128,19 @@ void Game::processInputs()
 {
     if (m_state == State::LOADING)
     {
+        call_getInitialGameState();
+        const auto response = val::take_ownership(getInitialGameState());
+
+        if (!response.isNull())
+        {
+            const bool dataSet = response["dataSet"].as<bool>();
+            if (dataSet)
+            {
+                // Do something with the response.gameState
+
+                m_state = State::RUN_SIMULATION;
+            }
+        }
     }
     else
     {
@@ -160,7 +173,7 @@ void Game::processInputs()
 
         if (apiCalled)
         {
-            auto response = val::take_ownership(getGeminiResponse());
+            const auto response = val::take_ownership(getGeminiResponse());
             if (!response.isNull())
             {
                 apiCalled = false;

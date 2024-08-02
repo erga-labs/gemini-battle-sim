@@ -10,7 +10,8 @@ class Game
 {
 
 public:
-    enum class State {
+    enum class State
+    {
         // while waiting for the user to set the initial config
         LOADING = 0,
         // simulation
@@ -40,7 +41,7 @@ private:
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
-    State m_state = State::RUN_SIMULATION;
+    State m_state = State::LOADING;
 
     BattalionHandler m_battalionHandler;
 

@@ -64,3 +64,14 @@ Module.call_getGeminiResponse = (secretKey) => {
         Module.geminiResponse = json;
     });
 };
+
+
+Module.initialGameState = null;
+
+Module.call_getInitialGameState = () => {
+    fetch("/api/init", { method: 'GET' })
+    .then(async (response) => {
+        const json = await response.json();
+        Module.initialGameState = json;
+    });
+}
