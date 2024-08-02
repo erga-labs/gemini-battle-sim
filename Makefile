@@ -1,6 +1,6 @@
 
 CXXFLAGS = -O1
-EMFLAGS = -s USE_GLFW=3 -s ASYNCIFY --bind --preload-file assets --pre-js prefix.js -sEXPORTED_FUNCTIONS=_setColor,_main
+EMFLAGS = -s USE_GLFW=3 --bind --preload-file assets --pre-js prefix.js
 INCLUDES = -I . -I external/
 LDFLAGS  = -L external/raylib -lraylib
 

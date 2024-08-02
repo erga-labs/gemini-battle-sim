@@ -7,12 +7,7 @@ Game *game = nullptr;
 
 extern "C"
 {
-    // when calling the function from js, prefix it with _
-    // _setColor
-    void setColor(uint8_t r, uint8_t g, uint8_t b)
-    {
-        TraceLog(LOG_WARNING, "This function has been removed");
-    }
+    // functions to be exposed here
 }
 
 int main()
