@@ -2,6 +2,7 @@
 #include "src/game.h"
 #include "src/worldgen.h"
 #include "src/js_functions.h"
+#include "src/raygui.h"
 #include <raylib/raymath.h>
 #include <emscripten.h>
 
@@ -17,6 +18,11 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 {
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(windowWidth, windowHeight, windowTitle);
+    GuiSetAlpha(0.8);
+    GuiLoadStyle("assets/style.txt.rgs");
+
+    Font font = LoadFont("assets/AtariST8x16SystemFont.ttf");
+    GuiSetFont(font);
 
     setup();
 }
@@ -115,13 +121,7 @@ void Game::drawFrame()
 
         EndMode2D();
 
-        const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
-        DrawText(TextFormat("MousePos: %f %f", mousePos.x, mousePos.y), 10, 10, 20, BLACK);
-        DrawText(TextFormat("CamScale: %f", m_camera.zoom), 10, 40, 20, BLACK);
-        if (auto b = m_battalionHandler.getClosest(mousePos, 5.0))
-        {
-            DrawText(TextFormat("Closest battalion: %d", b->m_id), 10, 70, 20, BLACK);
-        }
+        m_battalionHandler.drawInfoPanel();
     }
 }
 
@@ -173,29 +173,35 @@ void Game::processInputs()
         const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
         m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
 
-        static bool apiCalled = false;
+        // static bool apiCalled = false;
 
-        if (!apiCalled && IsKeyPressed(KEY_SPACE))
-        {
-            TraceLog(LOG_WARNING, "Calling gemini");
-            call_getGeminiResponse();
-            apiCalled = true;
-        }
+        // if (!apiCalled && IsKeyPressed(KEY_SPACE))
+        // {
+        //     TraceLog(LOG_WARNING, "Calling gemini");
+        //     call_getGeminiResponse();
+        //     apiCalled = true;
+        // }
 
-        if (apiCalled)
-        {
-            const auto response = val::take_ownership(getGeminiResponse());
-            if (!response.isNull())
-            {
-                apiCalled = false;
-                std::string promptResp = response["response"].as<std::string>();
-                TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
-            }
-        }
+        // if (apiCalled)
+        // {
+        //     const auto response = val::take_ownership(getGeminiResponse());
+        //     if (!response.isNull())
+        //     {
+        //         apiCalled = false;
+        //         std::string promptResp = response["response"].as<std::string>();
+        //         TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
+        //     }
+        // }
 
         if (IsKeyPressed(KEY_X))
         {
             m_battalionHandler.printDetails();
+        }
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
+            m_battalionHandler.selectBattalion(mousePos, 5.0);
         }
     }
 }

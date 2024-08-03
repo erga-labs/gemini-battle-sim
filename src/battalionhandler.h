@@ -29,8 +29,10 @@ public:
     void removeDead();
     /// @brief gives an overview of the battalions
     void printDetails() const;
-    /// @brief returns the battalion at the specified position
-    std::shared_ptr<Battalion> getClosest(Vector2 position, float threshold) const;
+    /// @brief selects the closest battalion to the position
+    void selectBattalion(Vector2 position, float threshold);
+    /// @brief displays the information of the selected battalion
+    void drawInfoPanel() const;
 
 private:
     /// @brief get the target for the battalion provided
@@ -39,4 +41,6 @@ private:
 private:
     std::vector<std::shared_ptr<Battalion>> m_attackerBattalions;
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
+
+    std::weak_ptr<Battalion> m_selectedBattalion;
 };
