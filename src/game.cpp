@@ -90,9 +90,10 @@ void Game::setup()
 
 void Game::drawFrame()
 {
-    if (m_state == State::LOADING)
+    if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
     {
-        const char *text = "Waiting for user to set game state";
+        const char *text = nullptr;
+        text = (m_state == State::WAITING_USER) ? "Waiting for user to set game state" : "Waiting for gemini to set game state";
         const int fontSize = 30;
         const int textWidth = MeasureText(text, fontSize);
         const Vector2 textSize = MeasureTextEx(GetFontDefault(), text, fontSize, fontSize / 10);
@@ -126,19 +127,29 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
-    if (m_state == State::LOADING)
+    if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
     {
         call_getInitialGameState();
         const auto response = val::take_ownership(getInitialGameState());
 
         if (!response.isNull())
         {
-            const bool dataSet = response["dataSet"].as<bool>();
-            if (dataSet)
+            if (m_state == State::WAITING_USER)
             {
-                // Do something with the response.gameState
-
-                m_state = State::RUN_SIMULATION;
+                const bool dataSet = response["userDataSet"].as<bool>();
+                if (dataSet)
+                {
+                    m_state = State::WAITING_GEMINI;
+                }
+            }
+            else
+            {
+                const bool dataSet = response["aiDataSet"].as<bool>();
+                if (dataSet)
+                {
+                    // do something with the gameState
+                    m_state = State::RUN_SIMULATION;
+                }
             }
         }
     }
