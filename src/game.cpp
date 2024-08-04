@@ -163,7 +163,7 @@ void Game::processInputs()
     }
     else
     {
-        const float zoomDelta = GetMouseWheelMove();
+        const float zoomDelta = 60 * GetMouseWheelMove() * GetFrameTime();
         m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
 
         Vector2 camMoveVec = {0, 0};
@@ -171,7 +171,7 @@ void Game::processInputs()
         camMoveVec.x += IsKeyDown(KEY_D);
         camMoveVec.y -= IsKeyDown(KEY_W);
         camMoveVec.y += IsKeyDown(KEY_S);
-        camMoveVec = Vector2Scale(camMoveVec, 10.0f / m_camera.zoom);
+        camMoveVec = Vector2Scale(camMoveVec, 600.0f / m_camera.zoom * GetFrameTime());
         m_camera.target = Vector2Add(m_camera.target, camMoveVec);
 
         Vector2 camPadding = {15, 15};
