@@ -1,21 +1,11 @@
 
-#include "worldgen.h"
-
-WorldGen::WorldGen()
-{
-    m_spriteSheet = LoadTexture("assets/spritesheet.png");
-    SetTextureFilter(m_spriteSheet, TEXTURE_FILTER_POINT);
-}
-
-WorldGen::~WorldGen()
-{
-    UnloadTexture(m_spriteSheet);
-}
+#include "src/worldgen.h"
 
 Texture WorldGen::createWorldTexture(int boundX, int boundY)
 {
     // how crisp the texture is (16 is a good number for now)
     const float crispFactor = 16;
+    Texture worldSpriteSheet = LoadTexture("assets/spritesheets/world.png");
 
     // dirt texture: 0 to 1
     // weed texture: 2 to 3
@@ -31,7 +21,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
         {0, 48, 16, 16},
     };
 
-    const std::vector<Tile> worldData = createWorld(boundX, boundY);
+    const std::vector<Tile> worldData = WorldGen::createWorld(boundX, boundY);
     // the world will be drawn into this
     RenderTexture renderTex = LoadRenderTexture(boundX * crispFactor, boundY * crispFactor);
 
@@ -51,7 +41,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
             const Tile tile = worldData[x + y * boundX];
             const int texIndex = GetRandomValue((int)tile * 2, (int)tile * 2 + 1);
             const Rectangle destRect = {x * crispFactor, y * crispFactor, crispFactor, crispFactor};
-            DrawTexturePro(m_spriteSheet, srcRects[texIndex], destRect, {0, 0}, 0, WHITE);
+            DrawTexturePro(worldSpriteSheet, srcRects[texIndex], destRect, {0, 0}, 0, WHITE);
 
             if (tile == Tile::Dirt)
             {
@@ -73,7 +63,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
                     const float originY = (quad == 1 || quad == 2) ? 1 : 0;
                     const Vector2 origin = {originX * crispFactor, originY * crispFactor};
 
-                    DrawTexturePro(m_spriteSheet, srcRects[6], destRect, origin, quad * 90, {255, 255, 255, 235});
+                    DrawTexturePro(worldSpriteSheet, srcRects[6], destRect, origin, quad * 90, {255, 255, 255, 235});
                 }
             }
         }
@@ -87,27 +77,22 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     // unloading stuff
     renderTex.texture.id = 0;
     UnloadRenderTexture(renderTex);
+    UnloadTexture(worldSpriteSheet);
 
     return out;
 }
 
 Texture WorldGen::createCloudTexture()
 {
-    // Have to load a render texture of some power of 2 since wrapping is not supported for NPOT in gles 2.0
-    RenderTexture renderTex = LoadRenderTexture(256, 128);
+    Image cloudMapImage = LoadImage("assets/spritesheets/cloud_map.png");
+    ImageResizeNN(&cloudMapImage, 256, 128);
 
-    BeginTextureMode(renderTex);
-    DrawTexturePro(m_spriteSheet, {0, 167, 224, 100}, {0, 0, 256, 128}, {256, 128}, 180, WHITE);
-    EndTextureMode();
+    Texture cloudTexture = LoadTextureFromImage(cloudMapImage);
+    SetTextureFilter(cloudTexture, TEXTURE_FILTER_POINT);
+    SetTextureWrap(cloudTexture, TEXTURE_WRAP_REPEAT);
+    UnloadImage(cloudMapImage);
 
-    Texture out = renderTex.texture;
-    SetTextureFilter(out, TEXTURE_FILTER_POINT);
-    SetTextureWrap(out, TEXTURE_WRAP_REPEAT);
-
-    renderTex.texture.id = 0;
-    UnloadRenderTexture(renderTex);
-
-    return out;
+    return cloudTexture;
 }
 
 std::vector<Tile> WorldGen::createWorld(int boundX, int boundY)
