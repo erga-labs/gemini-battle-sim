@@ -16,7 +16,7 @@ Battalion::Battalion(
     m_speed = 5.0f; // * (10.0f / float(troopCount));
     m_damage = (btype == BType::Archer) ? 10.0f : 15.0f;
     m_accuracy = (btype == BType::Archer) ? 0.6f : 0.6f; // 75% for Archers, 60% for Warriors
-    m_cooldown = (btype == BType::Archer) ? 60 : 30;
+    m_cooldown = (btype == BType::Archer) ? 2.0f : 1.0f;
 
     if (group == Group::Defender)
     {
@@ -58,6 +58,10 @@ void Battalion::setTarget(std::weak_ptr<Battalion> target)
 
 void Battalion::attackTarget()
 {
+    if (m_cooldown > 0.0)
+    {
+        return;
+    }
 
     if (auto target = m_target.lock())
     {
@@ -73,21 +77,17 @@ void Battalion::attackTarget()
                     target->m_currentTroopCount = 0;
             }
         }
+
+        m_cooldown = (m_btype == BType::Archer) ? 2.0f : 1.0f;
     }
 }
 
 void Battalion::update()
 {
-    m_cooldown--;
-    if (m_cooldown <= 0 && m_currentTroopCount > 0)
-    {
-        attackTarget();
-        m_cooldown = (m_btype == BType::Archer) ? 60 : 30;
-    }
-
-    rotateTowardsTarget();
+    m_cooldown -= GetFrameTime();
+    attackTarget();
     moveTowardsTarget();
-    // enrage();
+    rotateTowardsTarget();
 }
 
 void Battalion::moveTowardsTarget()
@@ -109,20 +109,27 @@ void Battalion::moveTowardsTarget()
     }
 }
 
-void Battalion::rotateTowardsTarget() {
-    if (auto target = m_target.lock()) {
+void Battalion::rotateTowardsTarget()
+{
+    if (auto target = m_target.lock())
+    {
         const Vector2 direction = Vector2Subtract(target->m_position, m_position);
         const float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG + 90.0f;
         float deltaRotation = targetRotation - m_rotation;
 
-        if (deltaRotation > 180.0f) deltaRotation -= 360.0f;
-        else if (deltaRotation < -180.0f) deltaRotation += 360.0f;
+        if (deltaRotation > 180.0f)
+            deltaRotation -= 360.0f;
+        else if (deltaRotation < -180.0f)
+            deltaRotation += 360.0f;
 
         const float rotationStep = 60.0f * GetFrameTime();
         // m_rotation += std::copysign(rotationStep, deltaRotation);
-        if (std::fabs(deltaRotation) <= rotationStep) {
+        if (std::fabs(deltaRotation) <= rotationStep)
+        {
             m_rotation = targetRotation; // If close enough, snap to target
-        } else {
+        }
+        else
+        {
             m_rotation += std::copysign(rotationStep, deltaRotation);
         }
     }

@@ -55,8 +55,8 @@ private:
     float m_agression = 1.0;
     float m_rotation;
 
-    int m_cooldown;
-    Color m_color = BLUE;
+    float m_cooldown; // time remaining in seconds for the battalion to attack again
+    Color m_color;
 
     // Additional attributes
     float m_attackRange;  // will be derived from btype and currentTroopCount
