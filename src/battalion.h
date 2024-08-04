@@ -25,8 +25,8 @@ public:
     /// @param rotation user can spawn the battalion with rotation (maybe by default we can just point it towards the opponents palace)
     Battalion(int id, Group group, BType btype, Vector2 position, int troopCount, float rotation);
     /// @brief draws the battalion
-    /// @param debug show info abt battalion
-    void draw() const;
+    /// @param selected highlights the battalion's ranges
+    void draw(bool selected) const;
     /// @brief will check whether the battalion is alive and is inside the lookoutRange
     bool hasValidTarget() const;
     /// @brief change the target, could be the current group's palace (back to the og formation)

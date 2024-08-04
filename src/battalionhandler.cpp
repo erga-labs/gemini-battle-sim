@@ -19,11 +19,11 @@ void BattalionHandler::drawAll() const
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->draw();
+        b->draw(b == m_selectedBattalion.lock());
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->draw();
+        b->draw(b == m_selectedBattalion.lock());
     }
 }
 

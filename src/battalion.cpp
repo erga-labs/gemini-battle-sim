@@ -28,16 +28,17 @@ Battalion::Battalion(
     }
 }
 
-void Battalion::draw() const
+void Battalion::draw(bool selected) const
 {
     const Rectangle rect = {m_position.x, m_position.y, m_currentTroopCount, 1.0};
     const Vector2 origin = {m_currentTroopCount / 2.0f, 0.5};
 
     DrawRectanglePro(rect, origin, m_rotation, m_color);
 
-    // Draw attack and lookout ranges
-    DrawCircleV(m_position, m_attackRange, {0, 0, 255, 40});
-    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, 20});
+    // Drawing more visible attack and lookout ranges if the battalion is selected
+    const uint8_t alpha = selected ? 30 : 5;
+    DrawCircleV(m_position, m_attackRange, {0, 0, 255, alpha});
+    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, alpha});
 }
 
 bool Battalion::hasValidTarget() const
