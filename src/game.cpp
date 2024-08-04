@@ -129,26 +129,34 @@ void Game::processInputs()
 {
     if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
     {
-        call_getInitialGameState();
-        const auto response = val::take_ownership(getInitialGameState());
+        static float lastTime = GetTime();
+        const float callStep = 1.0;
 
-        if (!response.isNull())
+        if (GetTime() - lastTime > callStep)
         {
-            if (m_state == State::WAITING_USER)
+            lastTime = GetTime();
+
+            call_getInitialGameState();
+            const auto response = val::take_ownership(getInitialGameState());
+
+            if (!response.isNull())
             {
-                const bool dataSet = response["userDataSet"].as<bool>();
-                if (dataSet)
+                if (m_state == State::WAITING_USER)
                 {
-                    m_state = State::WAITING_GEMINI;
+                    const bool dataSet = response["userDataSet"].as<bool>();
+                    if (dataSet)
+                    {
+                        m_state = State::WAITING_GEMINI;
+                    }
                 }
-            }
-            else
-            {
-                const bool dataSet = response["aiDataSet"].as<bool>();
-                if (dataSet)
+                else
                 {
-                    // do something with the gameState
-                    m_state = State::RUN_SIMULATION;
+                    const bool dataSet = response["aiDataSet"].as<bool>();
+                    if (dataSet)
+                    {
+                        // do something with the gameState
+                        m_state = State::RUN_SIMULATION;
+                    }
                 }
             }
         }
