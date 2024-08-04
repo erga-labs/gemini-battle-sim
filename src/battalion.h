@@ -39,6 +39,8 @@ private:
     void attackTarget();
     /// @brief if the target is within lookoutRange and not within attackRange, move towards it
     void moveTowardsTarget();
+    /// @brief rotate towards target
+    void rotateTowardsTarget();
     /// @brief increase speed, accuracy, and dodge when 10% of the troops die
     void enrage();
 

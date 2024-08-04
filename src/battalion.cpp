@@ -78,7 +78,6 @@ void Battalion::attackTarget()
 
 void Battalion::update()
 {
-
     m_cooldown--;
     if (m_cooldown <= 0 && m_currentTroopCount > 0)
     {
@@ -86,6 +85,7 @@ void Battalion::update()
         m_cooldown = (m_btype == BType::Archer) ? 60 : 30;
     }
 
+    rotateTowardsTarget();
     moveTowardsTarget();
     // enrage();
 }
@@ -105,12 +105,25 @@ void Battalion::moveTowardsTarget()
             }
 
             m_position = Vector2MoveTowards(m_position, target->m_position, m_speed * deltaTime);
+        }
+    }
+}
 
-            const Vector2 direction = Vector2Subtract(target->m_position, m_position);
-            if (Vector2Length(direction) > 0.0)
-            {
-                m_rotation = (atan2f(direction.y, direction.x) * RAD2DEG) + 90.0f;
-            }
+void Battalion::rotateTowardsTarget() {
+    if (auto target = m_target.lock()) {
+        const Vector2 direction = Vector2Subtract(target->m_position, m_position);
+        const float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG + 90.0f;
+        float deltaRotation = targetRotation - m_rotation;
+
+        if (deltaRotation > 180.0f) deltaRotation -= 360.0f;
+        else if (deltaRotation < -180.0f) deltaRotation += 360.0f;
+
+        const float rotationStep = 60.0f * GetFrameTime();
+        // m_rotation += std::copysign(rotationStep, deltaRotation);
+        if (std::fabs(deltaRotation) <= rotationStep) {
+            m_rotation = targetRotation; // If close enough, snap to target
+        } else {
+            m_rotation += std::copysign(rotationStep, deltaRotation);
         }
     }
 }
