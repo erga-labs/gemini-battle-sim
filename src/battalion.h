@@ -1,14 +1,14 @@
+
 #pragma once
 
-#include <raylib/raylib.h>
+#include "src/troop.h"
+#include <vector>
 #include <memory>
-#include <raylib/raymath.h>
-#include <cstdlib>
 
 enum class BType
 {
-    Archer = 0,
-    Warrior = 1,
+    Warrior = 0,
+    Archer = 1,
 };
 
 enum class Group
@@ -21,49 +21,33 @@ class Battalion
 {
 
 public:
-    /// @param group attacker or defender
-    /// @param rotation user can spawn the battalion with rotation (maybe by default we can just point it towards the opponents palace)
-    Battalion(int id, Group group, BType btype, Vector2 position, int troopCount, float rotation);
-    /// @brief draws the battalion
-    /// @param selected highlights the battalion's ranges
+    Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> &troopPositions);
+
+    float hasValidTarget() const;
+    int getTroopCount() const { return m_troops.size(); }
     void draw(bool selected) const;
-    /// @brief will check whether the battalion is alive and is inside the lookoutRange
-    bool hasValidTarget() const;
-    /// @brief change the target, could be the current group's palace (back to the og formation)
-    void setTarget(std::weak_ptr<Battalion> target);
-    /// @brief calls moveTowardsTarget and attackTarget
     void update();
 
 private:
-    /// @brief if the target is within attackRange, damage the target
-    void attackTarget();
-    /// @brief if the target is within lookoutRange and not within attackRange, move towards it
-    void moveTowardsTarget();
-    /// @brief increase speed, accuracy, and dodge when 10% of the troops die
-    void enrage();
+    /// @brief returns the ratio of troops that are within range of position given
+    float getActiveRatio(const Vector2 &position, float range) const;
+    /// @brief returns the factor which will be affecting speed & rotation
+    float getFactor() const;
+    void move();
+    void attack();
+    void rotate();
+    void removeDead();
 
 private:
-    std::weak_ptr<Battalion> m_target;
     int m_id;
     Group m_group;
     BType m_btype;
-    Vector2 m_position;
-    int m_initialTroopCount;
-    float m_currentTroopCount;
-    float m_agression = 1.0;
-    float m_rotation;
+    Vector2 m_center;
+    std::vector<Troop> m_troops;
+    std::weak_ptr<Battalion> m_target;
 
-    int m_cooldown;
-    Color m_color = BLUE;
-
-    // Additional attributes
-    float m_attackRange;  // will be derived from btype and currentTroopCount
-    float m_lookoutRange; // will be derived from btype and currentTroopCount
-    float m_speed;        // will be derived from btype and currentTroopCount
-    float m_damage;       // will be derived from btype and currentTroopCount
-    float m_accuracy;     // accuracy percentage
-    float m_dodge;        // dodge percentage
+    float m_rotation = 0.0;
+    float m_cooldown;
 
     friend class BattalionHandler;
-    friend class Game;
 };
