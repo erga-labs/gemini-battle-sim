@@ -1,9 +1,15 @@
+
 #pragma once
 
-#include "src/troop.h"
+#include <raylib/raylib.h>
 #include <vector>
 #include <memory>
-#include <float.h>
+
+struct Troop
+{
+    Vector2 position;
+    float health;
+};
 
 enum class BType
 {
@@ -21,23 +27,21 @@ class Battalion
 {
 
 public:
-    Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> &troopPositions);
+    Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> troopOffsets);
 
-    float hasValidTarget() const;
+    /// @brief returns the ratio [0.0 to 1.0] of troops that are within threshold range of position
+    float getActiveRatio(const Vector2 &position, float range) const;
+    float getLookoutRatio() const;
     int getTroopCount() const { return m_troops.size(); }
     void draw(bool selected) const;
     void update();
 
 private:
-    /// @brief returns the ratio of troops that are within range of position given
-    float getActiveRatio(const Vector2 &position, float range) const;
-    /// @brief returns the factor which will be affecting speed & rotation
-    float getFactor() const;
+    void removeDead();
     void move();
     void attack();
     void rotate();
-    void removeDead();
-    
+
 private:
     int m_id;
     Group m_group;
@@ -46,7 +50,7 @@ private:
     std::vector<Troop> m_troops;
     std::weak_ptr<Battalion> m_target;
 
-    float m_rotation = 0.0;
+    float m_rotation;
     float m_cooldown;
 
     friend class BattalionHandler;

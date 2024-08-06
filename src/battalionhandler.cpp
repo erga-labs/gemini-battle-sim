@@ -47,7 +47,7 @@ void BattalionHandler::updateTargets()
 
     for (auto &battalion : m_attackerBattalions)
     {
-        if (battalion->hasValidTarget() < threshold)
+        if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
             battalion->m_target = target;
@@ -55,7 +55,7 @@ void BattalionHandler::updateTargets()
     }
     for (auto &battalion : m_defenderBattalions)
     {
-        if (battalion->hasValidTarget() < threshold)
+        if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
             battalion->m_target = target;
@@ -92,7 +92,7 @@ void BattalionHandler::printDetails() const
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
         stream << " TroopCount: " << b->getTroopCount();
         stream << " Position: " << b->m_center.x << " " << b->m_center.y;
-        stream << " HasTarget: " << b->hasValidTarget();
+        stream << " HasTarget: " << b->getLookoutRatio();
         stream << "\n";
     }
 
@@ -103,7 +103,7 @@ void BattalionHandler::printDetails() const
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
         stream << " TroopCount: " << b->getTroopCount();
         stream << " Position: " << b->m_center.x << " " << b->m_center.y;
-        stream << " HasTarget: " << b->hasValidTarget();
+        stream << " HasTarget: " << b->getLookoutRatio();
         stream << "\n";
     }
 
