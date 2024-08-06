@@ -1,14 +1,20 @@
+
 #pragma once
 
 #include <raylib/raylib.h>
+#include <vector>
 #include <memory>
-#include <raylib/raymath.h>
-#include <cstdlib>
+
+struct Troop
+{
+    Vector2 position;
+    float health;
+};
 
 enum class BType
 {
-    Archer = 0,
-    Warrior = 1,
+    Warrior = 0,
+    Archer = 1,
 };
 
 enum class Group
@@ -21,51 +27,31 @@ class Battalion
 {
 
 public:
-    /// @param group attacker or defender
-    /// @param rotation user can spawn the battalion with rotation (maybe by default we can just point it towards the opponents palace)
-    Battalion(int id, Group group, BType btype, Vector2 position, int troopCount, float rotation);
-    /// @brief draws the battalion
-    /// @param selected highlights the battalion's ranges
+    Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> troopOffsets);
+
+    /// @brief returns the ratio [0.0 to 1.0] of troops that are within threshold range of position
+    float getActiveRatio(const Vector2 &position, float range) const;
+    float getLookoutRatio() const;
+    int getTroopCount() const { return m_troops.size(); }
     void draw(bool selected) const;
-    /// @brief will check whether the battalion is alive and is inside the lookoutRange
-    bool hasValidTarget() const;
-    /// @brief change the target, could be the current group's palace (back to the og formation)
-    void setTarget(std::weak_ptr<Battalion> target);
-    /// @brief calls moveTowardsTarget and attackTarget
     void update(float deltaTime);
 
 private:
-    /// @brief if the target is within attackRange, damage the target
-    void attackTarget(float deltaTime);
-    /// @brief if the target is within lookoutRange and not within attackRange, move towards it
-    void moveTowardsTarget(float deltaTime);
-    /// @brief rotate towards target
-    void rotateTowardsTarget(float deltaTime);
-    /// @brief increase speed, accuracy, and dodge when 10% of the troops die
-    void enrage();
+    void removeDead();
+    void move(float deltaTime);
+    void attack(float deltaTime);
+    void rotate(float deltaTime);
 
 private:
-    std::weak_ptr<Battalion> m_target;
     int m_id;
     Group m_group;
     BType m_btype;
-    Vector2 m_position;
-    int m_initialTroopCount;
-    float m_currentTroopCount;
-    float m_agression = 1.0;
+    Vector2 m_center;
+    std::vector<Troop> m_troops;
+    std::weak_ptr<Battalion> m_target;
+
     float m_rotation;
-
-    float m_cooldown; // time remaining in seconds for the battalion to attack again
-    Color m_color;
-
-    // Additional attributes
-    float m_attackRange;  // will be derived from btype and currentTroopCount
-    float m_lookoutRange; // will be derived from btype and currentTroopCount
-    float m_speed;        // will be derived from btype and currentTroopCount
-    float m_damage;       // will be derived from btype and currentTroopCount
-    float m_accuracy;     // accuracy percentage
-    float m_dodge;        // dodge percentage
+    float m_cooldown;
 
     friend class BattalionHandler;
-    friend class Game;
 };

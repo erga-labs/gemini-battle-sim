@@ -1,62 +1,123 @@
-#include "battalion.h"
 
-Battalion::Battalion(
-    int id,
-    Group group,
-    BType btype,
-    Vector2 position,
-    int troopCount,
-    float rotation) : m_id(id), m_group(group), m_btype(btype), m_position(position),
-                      m_initialTroopCount(troopCount), m_currentTroopCount(troopCount),
-                      m_rotation(rotation)
+#include "src/battalion.h"
+#include <raylib/raymath.h>
+#include <algorithm>
+
+const float const_attackRange[] = {3.0f, 5.0f};
+const float const_lookoutRange[] = {18.0f, 25.0f};
+const float const_speed[] = {5.0f, 4.0f};
+const float const_health[] = {30.0f, 15.0f};
+const float const_damage[] = {10.0f, 5.0f};
+const float const_accuracy[] = {0.8f, 0.6f};
+const float const_cooldown[] = {0.5f, 1.0f};
+const float const_rotation[] = {90.0f, 70.0f};
+
+const Color const_colors[2][2] = {
+    {Color{140, 0, 0, 255}, Color{220, 20, 60, 255}},
+    {Color{0, 0, 140, 255}, Color{60, 20, 220, 255}},
+};
+
+Battalion::Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> troopOffsets)
+    : m_id(id), m_group(group), m_btype(btype), m_center(center)
 {
-    // Derived values based on btype and troop count
-    m_attackRange = (btype == BType::Archer) ? 5.0f : 3.0f;
-    m_lookoutRange = (btype == BType::Archer) ? 25.0f : 17.5f;
-    m_speed = 5.0f; // * (10.0f / float(troopCount));
-    m_damage = (btype == BType::Archer) ? 10.0f : 15.0f;
-    m_accuracy = (btype == BType::Archer) ? 0.6f : 0.6f; // 75% for Archers, 60% for Warriors
-    m_cooldown = (btype == BType::Archer) ? 2.0f : 1.0f;
+    m_rotation = 0.0;
 
-    if (group == Group::Defender)
+    for (const Vector2 &offset : troopOffsets)
     {
-        m_color = (btype == BType::Archer) ? Color{60, 20, 220, 255} : Color{0, 0, 140, 255};
+        Troop troop = {
+            .position = Vector2Add(m_center, offset),
+            .health = const_health[(int)m_btype],
+        };
+        m_troops.push_back(troop);
     }
-    else
+}
+
+float Battalion::getActiveRatio(const Vector2 &position, float range) const
+{
+    const float rangeSqr = range * range;
+    auto predicate = [&](const Troop &troop)
     {
-        m_color = (btype == BType::Archer) ? Color{220, 20, 60, 255} : Color{140, 0, 0, 255};
+        const float distSqr = Vector2DistanceSqr(troop.position, position);
+        return distSqr < rangeSqr;
+    };
+
+    const int count = std::count_if(m_troops.begin(), m_troops.end(), predicate);
+    return (float)count / getTroopCount();
+}
+
+float Battalion::getLookoutRatio() const
+{
+    if (auto target = m_target.lock())
+    {
+        return getActiveRatio(target->m_center, const_lookoutRange[(int)m_btype]);
     }
+    return 0.0;
 }
 
 void Battalion::draw(bool selected) const
 {
-    const Rectangle rect = {m_position.x, m_position.y, m_currentTroopCount, 1.0};
-    const Vector2 origin = {m_currentTroopCount / 2.0f, 0.5};
+    const Color color = const_colors[(int)m_group][(int)m_btype];
+    const uint8_t alpha = selected ? 30 : 10;
 
-    DrawRectanglePro(rect, origin, m_rotation, m_color);
+    const Rectangle rect = {m_center.x, m_center.y, (float)getTroopCount(), 1.0};
+    const Vector2 origin = {(float)getTroopCount() / 2, 0.5};
+    DrawRectanglePro(rect, origin, m_rotation, {color.r, color.g, color.b, alpha});
 
-    // Drawing more visible attack and lookout ranges if the battalion is selected
-    const uint8_t alpha = selected ? 30 : 5;
-    DrawCircleV(m_position, m_attackRange, {0, 0, 255, alpha});
-    DrawCircleV(m_position, m_lookoutRange, {0, 0, 255, alpha});
+    for (const auto &troop : m_troops)
+    {
+        DrawCircleV(troop.position, 0.2, BLACK);
+    }
+
+    for (const auto &troop : m_troops)
+    {
+        DrawCircleV(troop.position, const_attackRange[(int)m_btype], {color.r, color.g, color.b, alpha});
+    }
 }
 
-bool Battalion::hasValidTarget() const
+void Battalion::update(float deltaTime)
+{
+    m_cooldown -= deltaTime;
+    removeDead();
+    move(deltaTime);
+    attack(deltaTime);
+    rotate(deltaTime);
+}
+
+void Battalion::removeDead()
+{
+    auto predicate = [&](const Troop &troop)
+    {
+        return troop.health <= 0.0;
+    };
+
+    auto it = std::remove_if(m_troops.begin(), m_troops.end(), predicate);
+    m_troops.erase(it, m_troops.end());
+}
+
+void Battalion::move(float deltaTime)
 {
     if (auto target = m_target.lock())
     {
-        float distance = Vector2Distance(m_position, target->m_position);
-        return distance <= m_lookoutRange && m_currentTroopCount > 0;
+        // if `threshold` percent of troops can attack the target's center, dont move
+        const float moveThreshold = 0.4;
+        if (getActiveRatio(target->m_center, const_attackRange[(int)m_btype]) > moveThreshold)
+        {
+            return;
+        }
+
+        Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
+        movementVec = Vector2Normalize(movementVec);
+        movementVec = Vector2Scale(movementVec, const_speed[(int)m_btype] * deltaTime);
+
+        m_center = Vector2Add(m_center, movementVec);
+        for (auto &troop : m_troops)
+        {
+            troop.position = Vector2Add(troop.position, movementVec);
+        }
     }
-    return false;
 }
 
-void Battalion::setTarget(std::weak_ptr<Battalion> target)
-{
-    m_target = target;
-}
-
-void Battalion::attackTarget(float deltaTime)
+void Battalion::attack(float deltaTime)
 {
     if (m_cooldown > 0.0)
     {
@@ -65,79 +126,60 @@ void Battalion::attackTarget(float deltaTime)
 
     if (auto target = m_target.lock())
     {
-        float distance = Vector2Distance(m_position, target->m_position);
-        if (distance <= m_attackRange)
+        // for each troop in the battalion, get the closest valid target's troop
+        for (const Troop &troop : m_troops)
         {
-            // Calculate if the attack hits based on accuracy
-            if ((float)rand() / RAND_MAX <= m_accuracy)
+            // getting the closesst troop
+            Troop *targetTroop = nullptr;
+            float closestDistSqr = std::numeric_limits<float>::max();
+            for (auto &other : target->m_troops)
             {
-                TraceLog(LOG_WARNING, "%d attacks %d", m_id, target->m_id);
-                target->m_currentTroopCount -= 1.0f;
-                if (target->m_currentTroopCount < 0)
-                    target->m_currentTroopCount = 0;
+                const float distSqr = Vector2DistanceSqr(troop.position, other.position);
+                if (distSqr < closestDistSqr)
+                {
+                    closestDistSqr = distSqr;
+                    targetTroop = &other;
+                }
+            }
+
+            // trying to attack only if the closest troop is in attack range
+            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            if (closestDistSqr < attackRangeSqr)
+            {
+                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    targetTroop->health -= const_damage[(int)m_btype];
+                }
             }
         }
 
-        m_cooldown = (m_btype == BType::Archer) ? 2.0f : 1.0f;
+        m_cooldown = const_cooldown[(int)m_btype];
     }
 }
 
-void Battalion::update(float deltaTime)
-{
-    m_cooldown -= deltaTime;
-    attackTarget(deltaTime);
-    moveTowardsTarget(deltaTime);
-    rotateTowardsTarget(deltaTime);
-}
-
-void Battalion::moveTowardsTarget(float deltaTime)
+void Battalion::rotate(float deltaTime)
 {
     if (auto target = m_target.lock())
     {
-        float distance = Vector2Distance(m_position, target->m_position);
-        if (distance <= m_lookoutRange)
-        {
-            if (distance <= m_attackRange)
-            {
-                return; // Do nothing, just attack
-            }
+        const Vector2 direction = Vector2Subtract(target->m_center, m_center);
+        const float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG;
 
-            m_position = Vector2MoveTowards(m_position, target->m_position, m_speed * deltaTime);
-        }
-    }
-}
-
-void Battalion::rotateTowardsTarget(float deltaTime)
-{
-    if (auto target = m_target.lock())
-    {
-        const Vector2 direction = Vector2Subtract(target->m_position, m_position);
-        const float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG + 90.0f;
-        float deltaRotation = targetRotation - m_rotation;
-
+        // making deltaRotation in range [-180, 180] degrees
+        float deltaRotation = targetRotation - m_rotation + 90.0f;
         if (deltaRotation > 180.0f)
             deltaRotation -= 360.0f;
         else if (deltaRotation < -180.0f)
             deltaRotation += 360.0f;
 
-        const float rotationStep = 60.0f * deltaTime;
-        // m_rotation += std::copysign(rotationStep, deltaRotation);
-        if (std::fabs(deltaRotation) <= rotationStep)
-        {
-            m_rotation = targetRotation; // If close enough, snap to target
-        }
-        else
-        {
-            m_rotation += std::copysign(rotationStep, deltaRotation);
-        }
-    }
-}
+        const float rotationStep = const_rotation[(int)m_btype] * deltaTime;
+        m_rotation += std::copysign(rotationStep, deltaRotation);
 
-void Battalion::enrage()
-{
-    if (m_currentTroopCount <= m_initialTroopCount * 0.9)
-    {
-        m_speed *= 1.1f;
-        m_accuracy *= 1.1f;
+        // Rotate each troop around the battalion center by the new rotation
+        for (auto &troop : m_troops)
+        {
+            Vector2 relativePosition = Vector2Subtract(troop.position, m_center);
+            relativePosition = Vector2Rotate(relativePosition, std::copysign(rotationStep, deltaRotation) * DEG2RAD);
+            troop.position = Vector2Add(m_center, relativePosition);
+        }
     }
 }

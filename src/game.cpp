@@ -76,14 +76,19 @@ void Game::setup()
         {(m_worldBounds.x + 40) / 2, m_worldBounds.y / 2},
     };
 
-    std::vector<BattalionSpawnInfo> attackerBattalions = {
-        {.id = 1, .position = positions[0], .btype = BType::Warrior, .troopCount = 7},
-        {.id = 2, .position = positions[1], .btype = BType::Archer, .troopCount = 4},
+    const std::vector<Vector2> troops = {
+        {-1, 0},
+        {0, 0},
+        {1, 0},
     };
-    std::vector<BattalionSpawnInfo> defenderBattalions = {
-        {.id = 3, .position = positions[2], .btype = BType::Warrior, .troopCount = 5},
-        {.id = 4, .position = positions[3], .btype = BType::Archer, .troopCount = 5},
-    };
+
+    std::vector<BattalionSpawnInfo> attackerBattalions;
+    attackerBattalions.push_back(BattalionSpawnInfo{.id = 1, .position = positions[0], .btype = BType::Warrior, .troops = troops});
+    attackerBattalions.push_back(BattalionSpawnInfo{.id = 2, .position = positions[1], .btype = BType::Archer, .troops = troops});
+
+    std::vector<BattalionSpawnInfo> defenderBattalions;
+    defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = BType::Warrior, .troops = troops});
+    defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = BType::Archer, .troops = troops});
 
     m_battalionHandler.spawn(Group::Attacker, attackerBattalions);
     m_battalionHandler.spawn(Group::Defender, defenderBattalions);
@@ -131,7 +136,7 @@ void Game::processInputs()
     if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
     {
         static float lastTime = GetTime();
-        const float callStep = 1.0;
+        const float callStep = 0.2;
 
         if (GetTime() - lastTime > callStep)
         {

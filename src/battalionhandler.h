@@ -10,7 +10,7 @@ struct BattalionSpawnInfo
     int id;
     Vector2 position;
     BType btype;
-    int troopCount;
+    std::vector<Vector2> troops;
 };
 
 class BattalionHandler

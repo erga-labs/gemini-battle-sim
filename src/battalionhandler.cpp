@@ -1,6 +1,7 @@
 
 #include "src/battalionhandler.h"
 #include "src/raygui.h"
+#include <raylib/raymath.h>
 #include <algorithm>
 #include <sstream>
 
@@ -10,7 +11,7 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
     for (const BattalionSpawnInfo &info : spawnInfos)
     {
-        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, info.btype, info.position, info.troopCount, 0);
+        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, info.btype, info.position, info.troops);
         vec.push_back(battalion);
     }
 }
@@ -41,20 +42,23 @@ void BattalionHandler::updateAll(float deltaTime)
 
 void BattalionHandler::updateTargets()
 {
+    // if there are atleast this many troops that can chase the target, dont update target
+    const float threshold = 0.4;
+
     for (auto &battalion : m_attackerBattalions)
     {
-        if (!battalion->hasValidTarget())
+        if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
-            battalion->setTarget(target);
+            battalion->m_target = target;
         }
     }
     for (auto &battalion : m_defenderBattalions)
     {
-        if (!battalion->hasValidTarget())
+        if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
-            battalion->setTarget(target);
+            battalion->m_target = target;
         }
     }
 }
@@ -64,7 +68,7 @@ void BattalionHandler::removeDead()
     std::vector<std::shared_ptr<Battalion>> *vec = nullptr;
     auto predicate = [](std::shared_ptr<Battalion> battalion)
     {
-        return battalion->m_currentTroopCount == 0.0;
+        return battalion->getTroopCount() == 0;
     };
 
     vec = &m_attackerBattalions;
@@ -86,8 +90,9 @@ void BattalionHandler::printDetails() const
     {
         stream << " Id: " << b->m_id;
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
-        stream << " TroopCount: " << b->m_currentTroopCount;
-        stream << " Position: " << b->m_position.x << " " << b->m_position.y;
+        stream << " TroopCount: " << b->getTroopCount();
+        stream << " Position: " << b->m_center.x << " " << b->m_center.y;
+        stream << " HasTarget: " << b->getLookoutRatio();
         stream << "\n";
     }
 
@@ -96,8 +101,9 @@ void BattalionHandler::printDetails() const
     {
         stream << " Id: " << b->m_id;
         stream << " Type: " << ((b->m_btype == BType::Archer) ? "Archer" : "Warrior");
-        stream << " TroopCount: " << b->m_currentTroopCount;
-        stream << " Position: " << b->m_position.x << " " << b->m_position.y;
+        stream << " TroopCount: " << b->getTroopCount();
+        stream << " Position: " << b->m_center.x << " " << b->m_center.y;
+        stream << " HasTarget: " << b->getLookoutRatio();
         stream << "\n";
     }
 
@@ -111,7 +117,7 @@ void BattalionHandler::selectBattalion(Vector2 position, float threshold)
 
     for (const auto &other : m_attackerBattalions)
     {
-        const float distance = Vector2Distance(position, other->m_position);
+        const float distance = Vector2Distance(position, other->m_center);
         if (distance < closestDistance)
         {
             closestDistance = distance;
@@ -121,7 +127,7 @@ void BattalionHandler::selectBattalion(Vector2 position, float threshold)
 
     for (const auto &other : m_defenderBattalions)
     {
-        const float distance = Vector2Distance(position, other->m_position);
+        const float distance = Vector2Distance(position, other->m_center);
         if (distance < closestDistance)
         {
             closestDistance = distance;
@@ -167,7 +173,8 @@ void BattalionHandler::drawInfoPanel() const
 
     GuiLabel({20, 80, 280, 30}, TextFormat("Group: %s", (battalion->m_group == Group::Attacker) ? "Attacker" : "Defender"));
     GuiLabel({20, 110, 280, 30}, TextFormat("Type: %s", (battalion->m_btype == BType::Archer) ? "Archer" : "Warrior"));
-    GuiLabel({20, 140, 280, 30}, TextFormat("Health: %.2f%% | Count: %d", battalion->m_currentTroopCount / battalion->m_initialTroopCount * 100, (int)battalion->m_currentTroopCount));
+    // GuiLabel({20, 140, 280, 30}, TextFormat("Health: %.2f%% | Count: %d", battalion->m_currentTroopCount / battalion->m_initialTroopCount * 100, (int)battalion->m_currentTroopCount));
+    GuiLabel({20, 140, 280, 30}, TextFormat("Count: %d", battalion->getTroopCount()));
 }
 
 std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion> battalion) const
@@ -179,7 +186,7 @@ std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion
 
     for (const auto &other : vec)
     {
-        const float distance = Vector2Distance(battalion->m_position, other->m_position);
+        const float distance = Vector2Distance(battalion->m_center, other->m_center);
         if (distance < closestDistance)
         {
             closestDistance = distance;
