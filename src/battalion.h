@@ -1,9 +1,9 @@
-
 #pragma once
 
 #include "src/troop.h"
 #include <vector>
 #include <memory>
+#include <float.h>
 
 enum class BType
 {
@@ -37,7 +37,7 @@ private:
     void attack();
     void rotate();
     void removeDead();
-
+    
 private:
     int m_id;
     Group m_group;

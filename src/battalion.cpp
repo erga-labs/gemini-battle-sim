@@ -5,6 +5,8 @@
 
 /// Constants defination
 
+#define RMAX 2147483647.0f
+
 const float const_attackRange[] = {3.0f, 5.0f};
 const float const_lookoutRange[] = {18.0f, 25.0f};
 const float const_speed[] = {5.0f, 4.0f};
@@ -50,10 +52,15 @@ float Battalion::hasValidTarget() const
 
 void Battalion::draw(bool selected) const
 {
+    const Rectangle rect = {m_center.x, m_center.y, (float)getTroopCount(), 1.0};
+    const Vector2 origin = {(float)getTroopCount() / 2.0f, 0.5};
+
+    DrawRectanglePro(rect, origin, m_rotation, BLUE);
     DrawCircleV(m_center, 0.8f, BLACK);
     for (const auto &troop : m_troops)
     {
         DrawCircleV(troop.position, 0.4f, colors[(int)m_group][(int)m_btype]);
+        DrawCircleV(troop.position, const_attackRange[(int)m_btype], {40, 40, 40, 60});
     }
 
     // Drawing more visible attack and lookout ranges if the battalion is selected
@@ -68,7 +75,7 @@ void Battalion::update()
     removeDead();
     move();
     attack();
-    rotate();
+    // rotate();
 }
 
 float Battalion::getActiveRatio(const Vector2 &position, float range) const
@@ -97,26 +104,57 @@ void Battalion::move()
 {
     if (auto target = m_target.lock())
     {
-        const float deltaTime = GetFrameTime();
-        const float aRange = const_attackRange[(int)m_btype];
-        const float aThreshold = 0.4;
-        const float activeRatio = getActiveRatio(target->m_center, aRange);
+        // Calculate the direction vector to the target
+        Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
+        float distanceToTarget = Vector2Length(movementVec);
 
-        if (activeRatio > aThreshold)
+        // Define a small threshold distance (dead zone) to prevent minor movements
+        const float deadZoneThreshold = 0.5f;
+        if (distanceToTarget < deadZoneThreshold)
         {
+            // If within dead zone, don't move
             return;
         }
 
-        const float frameSpeed = const_speed[(int)m_btype] / getFactor() * deltaTime;
-        Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
+        // Normalize movement vector and scale by speed
         movementVec = Vector2Normalize(movementVec);
+        const float deltaTime = GetFrameTime();
+        const float frameSpeed = const_speed[(int)m_btype] * deltaTime;
         movementVec = Vector2Scale(movementVec, frameSpeed);
 
-        m_center = Vector2Add(m_center, movementVec);
+        // Calculate new center position
+        Vector2 newCenter = Vector2Add(m_center, movementVec);
+
+        // Calculate the target rotation angle in degrees
+        float targetRotation = atan2f(movementVec.y, movementVec.x) * RAD2DEG + 90.0f; // +90 degrees to face "| vs |"
+
+        // Normalize the rotation angle to [-180, 180] degrees
+        if (targetRotation > 180.0f)
+            targetRotation -= 360.0f;
+        else if (targetRotation < -180.0f)
+            targetRotation += 360.0f;
+
+        // Apply the rotation to each troop's relative position
+        float rotationAngle = targetRotation - m_rotation;
+        if (rotationAngle > 180.0f)
+            rotationAngle -= 360.0f;
+        else if (rotationAngle < -180.0f)
+            rotationAngle += 360.0f;
+
+        // Update troop positions based on the new center and relative positions
         for (auto &troop : m_troops)
         {
-            troop.position = Vector2Add(troop.position, movementVec);
+            // Calculate the relative position of the troop to the battalion center
+            Vector2 relativePosition = Vector2Subtract(troop.position, m_center);
+            // Rotate the relative position
+            relativePosition = Vector2Rotate(relativePosition, rotationAngle * DEG2RAD);
+            // Update troop position with the new center position and rotated relative position
+            troop.position = Vector2Add(newCenter, relativePosition);
         }
+
+        // Update the battalion center position and rotation
+        m_center = newCenter;
+        m_rotation = targetRotation;
     }
 }
 
@@ -129,24 +167,30 @@ void Battalion::attack()
 
     if (auto target = m_target.lock())
     {
-        for (const auto &troop : m_troops)
+        for (auto &troop : m_troops)
         {
-            Troop &otherTroop = target->m_troops[0];
-            float closest = std::numeric_limits<float>::max();
+            Troop *closestTroop = nullptr;
+            float closestDistanceSquared = RMAX;
 
             for (auto &other : target->m_troops)
             {
-                const float distance = Vector2DistanceSqr(troop.position, other.position);
-                if (distance < closest)
+                const float distanceSquared = Vector2DistanceSqr(troop.position, other.position);
+                if (distanceSquared < closestDistanceSquared)
                 {
-                    closest = distance;
-                    otherTroop = other;
+                    closestDistanceSquared = distanceSquared;
+                    closestTroop = &other;
                 }
             }
 
-            if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+            float attackRangeSquared = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            if (closestDistanceSquared <= attackRangeSquared)
             {
-                otherTroop.currHealth -= const_damage[(int)m_btype];
+                if ((float)rand() / (float)RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    TraceLog(LOG_WARNING, "Battalion %d attacked Battalion %d", m_id, target->m_id);
+                    TraceLog(LOG_WARNING, "Battalion Distance %f (attackRange: %f)", sqrtf(closestDistanceSquared), const_attackRange[(int)m_btype]);
+                    closestTroop->currHealth -= const_damage[(int)m_btype];
+                }
             }
         }
 
@@ -154,30 +198,58 @@ void Battalion::attack()
     }
 }
 
-void Battalion::rotate()
-{
-    if (auto target = m_target.lock())
-    {
-        const Vector2 direction = Vector2Subtract(target->m_center, m_center);
-        const float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG + 90.0f;
-        float deltaRotation = targetRotation - m_rotation;
+// void Battalion::rotate()
+// {
+//     if (auto target = m_target.lock())
+//     {
+//         // Calculate the direction vector from this battalion's center to the target's center
+//         Vector2 direction = Vector2Subtract(target->m_center, m_center);
+//         // Calculate the angle in degrees
+//         float targetRotation = atan2f(direction.y, direction.x) * RAD2DEG;
 
-        if (deltaRotation > 180.0f)
-            deltaRotation -= 360.0f;
-        else if (deltaRotation < -180.0f)
-            deltaRotation += 360.0f;
+//         // Adjust the targetRotation to make it perpendicular (90 degrees offset)
+//         targetRotation += 90.0f;
 
-        const float rotationStep = const_rotation[(int)m_btype] * GetFrameTime();
-        m_rotation = fabs(deltaRotation) < rotationStep ? targetRotation : (m_rotation + std::copysign(rotationStep, deltaRotation));
+//         // Normalize targetRotation to the range [-180, 180] degrees
+//         if (targetRotation > 180.0f)
+//             targetRotation -= 360.0f;
+//         else if (targetRotation < -180.0f)
+//             targetRotation += 360.0f;
 
-        for (auto &troop : m_troops)
-        {
-            Vector2 v = Vector2Subtract(troop.position, m_center);
-            v = Vector2Rotate(v, rotationStep / 10);
-            troop.position = Vector2Add(v, m_center);
-        }
-    }
-}
+//         // Calculate the difference in rotation needed (deltaRotation)
+//         float deltaRotation = targetRotation - m_rotation;
+//         if (deltaRotation > 180.0f)
+//             deltaRotation -= 360.0f;
+//         else if (deltaRotation < -180.0f)
+//             deltaRotation += 360.0f;
+
+//         // Define a threshold to stop adjusting rotation when close enough
+//         const float rotationThreshold = 1.0f; // degrees
+//         const float rotationStep = const_rotation[(int)m_btype] * GetFrameTime();
+
+//         // Apply the rotation, ensuring it doesn't overshoot the target
+//         if (fabs(deltaRotation) > rotationThreshold)
+//         {
+//             if (fabs(deltaRotation) > rotationStep)
+//             {
+//                 m_rotation += std::copysign(rotationStep, deltaRotation);
+//             }
+//             else
+//             {
+//                 m_rotation = targetRotation;
+//             }
+
+//             // Rotate each troop around the battalion center by the new rotation
+//             for (auto &troop : m_troops)
+//             {
+//                 Vector2 relativePosition = Vector2Subtract(troop.position, m_center);
+//                 relativePosition = Vector2Rotate(relativePosition, deltaRotation * DEG2RAD);
+//                 troop.position = Vector2Add(m_center, relativePosition);
+//             }
+//         }
+//     }
+// }
+
 
 void Battalion::removeDead()
 {
