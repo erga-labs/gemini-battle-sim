@@ -22,7 +22,7 @@ public:
     /// @brief draw all the battalions
     void drawAll() const;
     /// @brief calls each battalion's update method
-    void updateAll();
+    void updateAll(float deltaTime);
     /// @brief makes sure that each battalion has a target
     void updateTargets();
     /// @brief removes battalions that are dead

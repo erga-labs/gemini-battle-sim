@@ -32,15 +32,15 @@ public:
     /// @brief change the target, could be the current group's palace (back to the og formation)
     void setTarget(std::weak_ptr<Battalion> target);
     /// @brief calls moveTowardsTarget and attackTarget
-    void update();
+    void update(float deltaTime);
 
 private:
     /// @brief if the target is within attackRange, damage the target
-    void attackTarget();
+    void attackTarget(float deltaTime);
     /// @brief if the target is within lookoutRange and not within attackRange, move towards it
-    void moveTowardsTarget();
+    void moveTowardsTarget(float deltaTime);
     /// @brief rotate towards target
-    void rotateTowardsTarget();
+    void rotateTowardsTarget(float deltaTime);
     /// @brief increase speed, accuracy, and dodge when 10% of the troops die
     void enrage();
 

@@ -18,9 +18,10 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 {
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(windowWidth, windowHeight, windowTitle);
+    m_targetFPS = 60;
+
     GuiSetAlpha(0.8);
     GuiLoadStyle("assets/style.txt.rgs");
-
     Font font = LoadFont("assets/AtariST8x16SystemFont.ttf");
     GuiSetFont(font);
 
@@ -36,7 +37,7 @@ Game::~Game()
 
 void Game::startGameLoop()
 {
-    emscripten_set_main_loop_arg(emscriptenMainLoop, this, 0, 1);
+    emscripten_set_main_loop_arg(emscriptenMainLoop, this, m_targetFPS, 1);
 }
 
 void Game::processFrame()
@@ -46,7 +47,7 @@ void Game::processFrame()
         m_cloudDrawOffset += 0.07;
         m_battalionHandler.removeDead();
         m_battalionHandler.updateTargets();
-        m_battalionHandler.updateAll();
+        m_battalionHandler.updateAll(1.0f / m_targetFPS);
     }
 
     BeginDrawing();

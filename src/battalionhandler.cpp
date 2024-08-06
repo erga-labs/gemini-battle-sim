@@ -27,15 +27,15 @@ void BattalionHandler::drawAll() const
     }
 }
 
-void BattalionHandler::updateAll()
+void BattalionHandler::updateAll(float deltaTime)
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->update();
+        b->update(deltaTime);
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->update();
+        b->update(deltaTime);
     }
 }
 

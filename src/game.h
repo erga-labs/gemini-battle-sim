@@ -44,6 +44,7 @@ private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
     State m_state = State::WAITING_USER;
+    int m_targetFPS;
 
     BattalionHandler m_battalionHandler;
 

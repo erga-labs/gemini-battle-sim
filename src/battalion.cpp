@@ -56,7 +56,7 @@ void Battalion::setTarget(std::weak_ptr<Battalion> target)
     m_target = target;
 }
 
-void Battalion::attackTarget()
+void Battalion::attackTarget(float deltaTime)
 {
     if (m_cooldown > 0.0)
     {
@@ -82,18 +82,16 @@ void Battalion::attackTarget()
     }
 }
 
-void Battalion::update()
+void Battalion::update(float deltaTime)
 {
-    m_cooldown -= GetFrameTime();
-    attackTarget();
-    moveTowardsTarget();
-    rotateTowardsTarget();
+    m_cooldown -= deltaTime;
+    attackTarget(deltaTime);
+    moveTowardsTarget(deltaTime);
+    rotateTowardsTarget(deltaTime);
 }
 
-void Battalion::moveTowardsTarget()
+void Battalion::moveTowardsTarget(float deltaTime)
 {
-    float deltaTime = GetFrameTime();
-
     if (auto target = m_target.lock())
     {
         float distance = Vector2Distance(m_position, target->m_position);
@@ -109,7 +107,7 @@ void Battalion::moveTowardsTarget()
     }
 }
 
-void Battalion::rotateTowardsTarget()
+void Battalion::rotateTowardsTarget(float deltaTime)
 {
     if (auto target = m_target.lock())
     {
@@ -122,7 +120,7 @@ void Battalion::rotateTowardsTarget()
         else if (deltaRotation < -180.0f)
             deltaRotation += 360.0f;
 
-        const float rotationStep = 60.0f * GetFrameTime();
+        const float rotationStep = 60.0f * deltaTime;
         // m_rotation += std::copysign(rotationStep, deltaRotation);
         if (std::fabs(deltaRotation) <= rotationStep)
         {
