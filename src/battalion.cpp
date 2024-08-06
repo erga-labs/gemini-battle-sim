@@ -54,6 +54,9 @@ void Battalion::draw(bool selected) const
     for (const auto &troop : m_troops)
     {
         DrawCircleV(troop.position, 0.4f, colors[(int)m_group][(int)m_btype]);
+
+        const Color color = colors[(int)m_group][(int)m_btype];
+        DrawCircleV(troop.position, const_attackRange[(int)m_btype], {color.r, color.g, color.b, 40});
     }
 
     // Drawing more visible attack and lookout ranges if the battalion is selected
@@ -136,17 +139,22 @@ void Battalion::attack()
 
             for (auto &other : target->m_troops)
             {
-                const float distance = Vector2DistanceSqr(troop.position, other.position);
-                if (distance < closest)
+                const float distanceSqr = Vector2DistanceSqr(troop.position, other.position);
+                if (distanceSqr < closest)
                 {
-                    closest = distance;
+                    closest = distanceSqr;
                     otherTroop = other;
                 }
             }
 
-            if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            if (closest < attackRangeSqr)
             {
-                otherTroop.currHealth -= const_damage[(int)m_btype];
+                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    otherTroop.currHealth -= const_damage[(int)m_btype];
+                    TraceLog(LOG_WARNING, "attack | distanceSqr: %f attackRangeSqr: %f", closest, attackRangeSqr);
+                }
             }
         }
 
@@ -168,13 +176,21 @@ void Battalion::rotate()
             deltaRotation += 360.0f;
 
         const float rotationStep = const_rotation[(int)m_btype] * GetFrameTime();
-        m_rotation = fabs(deltaRotation) < rotationStep ? targetRotation : (m_rotation + std::copysign(rotationStep, deltaRotation));
 
-        for (auto &troop : m_troops)
+        // if deltaRotation is really small, then snap to targetRotation
+        if (fabs(deltaRotation) < rotationStep)
         {
-            Vector2 v = Vector2Subtract(troop.position, m_center);
-            v = Vector2Rotate(v, rotationStep / 10);
-            troop.position = Vector2Add(v, m_center);
+            m_rotation = targetRotation;
+        }
+        else
+        {
+            m_rotation += std::copysign(rotationStep, deltaRotation);
+            for (auto &troop : m_troops)
+            {
+                Vector2 v = Vector2Subtract(troop.position, m_center);
+                v = Vector2Rotate(v, deltaRotation);
+                troop.position = Vector2Add(v, m_center);
+            }
         }
     }
 }
