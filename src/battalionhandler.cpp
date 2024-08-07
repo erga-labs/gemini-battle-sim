@@ -147,16 +147,6 @@ void BattalionHandler::drawInfoPanel() const
 
     auto battalion = m_selectedBattalion.lock();
 
-    std::weak_ptr<Battalion> m_target;
-    int m_id;
-    Group m_group;
-    BType m_btype;
-    Vector2 m_position;
-    int m_initialTroopCount;
-    float m_currentTroopCount;
-    float m_agression = 1.0;
-    float m_rotation;
-
     GuiPanel({10, 10, 300, (float)GetScreenHeight() - 20}, nullptr);
 
     // Header style
