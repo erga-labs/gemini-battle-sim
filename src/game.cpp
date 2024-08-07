@@ -24,6 +24,7 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     GuiLoadStyle("assets/style.txt.rgs");
     Font font = LoadFont("assets/AtariST8x16SystemFont.ttf");
     GuiSetFont(font);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
 
     setup();
 }
@@ -127,7 +128,7 @@ void Game::drawFrame()
 
         EndMode2D();
 
-        m_battalionHandler.drawInfoPanel();
+        m_battalionHandler.drawInfoPanel(m_camera);
     }
 }
 

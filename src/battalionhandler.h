@@ -32,7 +32,7 @@ public:
     /// @brief selects the closest battalion to the position
     void selectBattalion(Vector2 position, float threshold);
     /// @brief displays the information of the selected battalion
-    void drawInfoPanel() const;
+    void drawInfoPanel(const Camera2D &camera) const;
 
 private:
     /// @brief get the target for the battalion provided

@@ -138,33 +138,32 @@ void BattalionHandler::selectBattalion(Vector2 position, float threshold)
     m_selectedBattalion = (closestDistance < threshold) ? closest : std::weak_ptr<Battalion>();
 }
 
-void BattalionHandler::drawInfoPanel() const
+void BattalionHandler::drawInfoPanel(const Camera2D &camera) const
 {
-    if (m_selectedBattalion.expired())
+    if (auto b = m_selectedBattalion.lock())
     {
-        return;
+        const Vector2 screenPos = GetWorldToScreen2D(b->m_center, camera);
+        const float panelWidth = 220;
+
+        const float x = screenPos.x - panelWidth / 2;
+        const float y = screenPos.y - 150;
+
+        GuiPanel({x, y, panelWidth, 130}, nullptr);
+
+        GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+
+        GuiLabel({x + 10, y + 2, panelWidth - 20, 30}, TextFormat("Battalion Id: %d", b->m_id));
+        GuiLine({x + 5, y + 30, panelWidth - 10, 5}, nullptr);
+
+        GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
+
+        GuiLabel({x + 10, y + 40, panelWidth - 20, 20}, TextFormat("Type: %s", ((b->m_btype == BType::Warrior) ? "Warrior" : "Archer")));
+        GuiLabel({x + 10, y + 60, panelWidth - 20, 20}, TextFormat("Group: %s", ((b->m_group == Group::Attacker) ? "Attacker" : "Defender")));
+        GuiLabel({x + 10, y + 80, panelWidth - 20, 20}, TextFormat("Center: %.2f, %.2f", b->m_center.x, b->m_center.y));
+        GuiLabel({x + 10, y + 100, panelWidth - 20, 20}, TextFormat("TroopCount: %d", b->getTroopCount()));
     }
-
-    auto battalion = m_selectedBattalion.lock();
-
-    GuiPanel({10, 10, 300, (float)GetScreenHeight() - 20}, nullptr);
-
-    // Header style
-    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
-
-    GuiLabel({20, 20, 280, 40}, TextFormat("Battalion ID: %d", battalion->m_id));
-
-    GuiLine({15, 65, 290, 5}, nullptr);
-
-    // Normal style
-    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
-
-    GuiLabel({20, 80, 280, 30}, TextFormat("Group: %s", (battalion->m_group == Group::Attacker) ? "Attacker" : "Defender"));
-    GuiLabel({20, 110, 280, 30}, TextFormat("Type: %s", (battalion->m_btype == BType::Archer) ? "Archer" : "Warrior"));
-    // GuiLabel({20, 140, 280, 30}, TextFormat("Health: %.2f%% | Count: %d", battalion->m_currentTroopCount / battalion->m_initialTroopCount * 100, (int)battalion->m_currentTroopCount));
-    GuiLabel({20, 140, 280, 30}, TextFormat("Count: %d", battalion->getTroopCount()));
 }
 
 std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion> battalion) const
