@@ -1,17 +1,10 @@
 
 #pragma
 
+#include "src/battalionspawninfo.h"
 #include "src/battalion.h"
 #include <vector>
 #include <raylib/raylib.h>
-
-struct BattalionSpawnInfo
-{
-    int id;
-    Vector2 position;
-    BType btype;
-    std::vector<Vector2> troops;
-};
 
 class BattalionHandler
 {

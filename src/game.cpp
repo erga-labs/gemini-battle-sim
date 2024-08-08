@@ -3,6 +3,7 @@
 #include "src/worldgen.h"
 #include "src/js_functions.h"
 #include "src/raygui.h"
+#include "src/gameparser.h"
 #include <raylib/raymath.h>
 #include <emscripten.h>
 
@@ -84,12 +85,12 @@ void Game::setup()
     };
 
     std::vector<BattalionSpawnInfo> attackerBattalions;
-    attackerBattalions.push_back(BattalionSpawnInfo{.id = 1, .position = positions[0], .btype = BType::Warrior, .troops = troops});
-    attackerBattalions.push_back(BattalionSpawnInfo{.id = 2, .position = positions[1], .btype = BType::Archer, .troops = troops});
+    attackerBattalions.push_back(BattalionSpawnInfo{.id = 1, .position = positions[0], .btype = 0, .troops = troops});
+    attackerBattalions.push_back(BattalionSpawnInfo{.id = 2, .position = positions[1], .btype = 1, .troops = troops});
 
     std::vector<BattalionSpawnInfo> defenderBattalions;
-    defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = BType::Warrior, .troops = troops});
-    defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = BType::Archer, .troops = troops});
+    defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = 0, .troops = troops});
+    defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = 1, .troops = troops});
 
     m_battalionHandler = new BattalionHandler();
     m_battalionHandler->spawn(Group::Attacker, attackerBattalions);
@@ -141,6 +142,8 @@ void Game::processInputs()
         auto initState = val::take_ownership(getInitialGameState());
         if (!initState.isNull())
         {
+            auto gameState = parseInitialGameState(initState);
+            TraceLog(LOG_WARNING, "userBCount: %d | aiBCount: %d", gameState.attackerBattalions.size(), gameState.defenderBattalions.size());
             m_state = State::RUN_SIMULATION;
         }
     }

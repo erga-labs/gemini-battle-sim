@@ -21,7 +21,8 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
     for (const BattalionSpawnInfo &info : spawnInfos)
     {
-        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, info.btype, info.position, info.troops);
+        BType btype = (BType)info.btype;
+        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, info.position, info.troops);
         vec.push_back(battalion);
     }
 }
@@ -209,5 +210,3 @@ std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion
 
     return newTarget;
 }
-
-// AtariST8x16SystemFont.ttf
