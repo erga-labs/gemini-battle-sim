@@ -10,7 +10,7 @@ class BattalionHandler
 {
 
 public:
-    BattalionHandler();
+    BattalionHandler(Vector2 worldBounds);
     ~BattalionHandler();
     /// @brief spawns battalions under the group provided
     void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos);
@@ -38,6 +38,8 @@ private:
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
+
+    Vector2 m_worldBounds;
 
     Texture m_uiSpriteSheet;
 };

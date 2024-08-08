@@ -17,21 +17,24 @@ const Color const_colors[2][2] = {
     {Color{0, 0, 140, 255}, Color{60, 20, 220, 255}},
 };
 
-Battalion::Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> troopOffsets)
-    : m_id(id), m_group(group), m_btype(btype), m_center(center)
+Battalion::Battalion(int id, Group group, BType btype, const std::vector<Vector2> troopPositions)
+    : m_id(id), m_group(group), m_btype(btype)
 {
     m_rotation = 0.0;
 
-    for (const Vector2 &offset : troopOffsets)
+    Vector2 sum = {0.0f, 0.0f};
+    for (const Vector2 &position : troopPositions)
     {
         Troop troop = {
-            .position = Vector2Add(m_center, offset),
+            .position = position,
             .health = const_health[(int)m_btype],
         };
         m_troops.push_back(troop);
+        sum = Vector2Add(sum, position);
     }
 
     m_initialTroopCount = getTroopCount();
+    m_center = Vector2Scale(sum, 1.0f / m_initialTroopCount);
 }
 
 float Battalion::getActiveRatio(const Vector2 &position, float range) const

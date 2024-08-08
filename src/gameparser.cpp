@@ -28,8 +28,8 @@ InitialGameState parseInitialGameState(emscripten::val rawData)
         tolower(btype);
         info.btype = (btype == "warrior") ? 0 : 1;
 
-        auto center = emscripten::vecFromJSArray<float>(b["avgCenter"]);
-        info.position = {center[0], center[1]};
+        // auto center = emscripten::vecFromJSArray<float>(b["avgCenter"]);
+        // info.position = {center[0], center[1]};
 
         auto troops = emscripten::vecFromJSArray<emscripten::val>(b["troops"]);
         for (const auto &t : troops)
@@ -50,8 +50,8 @@ InitialGameState parseInitialGameState(emscripten::val rawData)
         tolower(btype);
         info.btype = (btype == "warrior") ? 0 : 1;
 
-        auto center = emscripten::vecFromJSArray<float>(b["avgCenter"]);
-        info.position = {center[0], center[1]};
+        // auto center = emscripten::vecFromJSArray<float>(b["avgCenter"]);
+        // info.position = {center[0], center[1]};
 
         auto troops = emscripten::vecFromJSArray<emscripten::val>(b["troops"]);
         for (const auto &t : troops)

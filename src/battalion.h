@@ -27,7 +27,7 @@ class Battalion
 {
 
 public:
-    Battalion(int id, Group group, BType btype, Vector2 center, const std::vector<Vector2> troopOffsets);
+    Battalion(int id, Group group, BType btype, const std::vector<Vector2> troopPositionss);
 
     /// @brief returns the ratio [0.0 to 1.0] of troops that are within threshold range of position
     float getActiveRatio(const Vector2 &position, float range) const;

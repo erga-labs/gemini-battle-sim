@@ -84,19 +84,7 @@ void Game::setup()
         {1, 0},
     };
 
-    std::vector<BattalionSpawnInfo> attackerBattalions;
-    attackerBattalions.push_back(BattalionSpawnInfo{.id = 1, .position = positions[0], .btype = 0, .troops = troops});
-    attackerBattalions.push_back(BattalionSpawnInfo{.id = 2, .position = positions[1], .btype = 1, .troops = troops});
-
-    std::vector<BattalionSpawnInfo> defenderBattalions;
-    defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = 0, .troops = troops});
-    defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = 1, .troops = troops});
-
-    m_battalionHandler = new BattalionHandler();
-    m_battalionHandler->spawn(Group::Attacker, attackerBattalions);
-    m_battalionHandler->spawn(Group::Defender, defenderBattalions);
-
-    m_battalionHandler->printDetails();
+    m_battalionHandler = new BattalionHandler(m_worldBounds);
 
     WorldGen worldGen;
     m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);
@@ -143,6 +131,8 @@ void Game::processInputs()
         if (!initState.isNull())
         {
             auto gameState = parseInitialGameState(initState);
+            m_battalionHandler->spawn(Group::Attacker, gameState.attackerBattalions);
+            m_battalionHandler->spawn(Group::Defender, gameState.defenderBattalions);
             TraceLog(LOG_WARNING, "userBCount: %d | aiBCount: %d", gameState.attackerBattalions.size(), gameState.defenderBattalions.size());
             m_state = State::RUN_SIMULATION;
         }
