@@ -21,15 +21,16 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_targetFPS = 60;
 
     GuiSetAlpha(0.8);
-    GuiLoadStyle("assets/style.txt.rgs");
     Font font = LoadFont("assets/AtariST8x16SystemFont.ttf");
     GuiSetFont(font);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(RAYWHITE));
 
     setup();
 }
 
 Game::~Game()
 {
+    delete m_battalionHandler;
     UnloadTexture(m_cloudTexture);
     UnloadTexture(m_worldTexture);
     CloseWindow();
@@ -45,9 +46,9 @@ void Game::processFrame()
     if (m_state == State::RUN_SIMULATION)
     {
         m_cloudDrawOffset += 0.07;
-        m_battalionHandler.removeDead();
-        m_battalionHandler.updateTargets();
-        m_battalionHandler.updateAll(1.0f / m_targetFPS);
+        m_battalionHandler->removeDead();
+        m_battalionHandler->updateTargets();
+        m_battalionHandler->updateAll(1.0f / m_targetFPS);
     }
 
     BeginDrawing();
@@ -90,10 +91,11 @@ void Game::setup()
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = BType::Warrior, .troops = troops});
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = BType::Archer, .troops = troops});
 
-    m_battalionHandler.spawn(Group::Attacker, attackerBattalions);
-    m_battalionHandler.spawn(Group::Defender, defenderBattalions);
+    m_battalionHandler = new BattalionHandler();
+    m_battalionHandler->spawn(Group::Attacker, attackerBattalions);
+    m_battalionHandler->spawn(Group::Defender, defenderBattalions);
 
-    m_battalionHandler.printDetails();
+    m_battalionHandler->printDetails();
 
     WorldGen worldGen;
     m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);
@@ -118,7 +120,7 @@ void Game::drawFrame()
         BeginMode2D(m_camera);
         drawCloud(220);
         drawWorld();
-        m_battalionHandler.drawAll();
+        m_battalionHandler->drawAll();
 
         // zooming in increases opacity
         const float cameraZoomRange = maxZoom - minZoom;
@@ -127,7 +129,7 @@ void Game::drawFrame()
 
         EndMode2D();
 
-        m_battalionHandler.drawInfoPanel();
+        m_battalionHandler->drawInfoPanel(m_camera);
     }
 }
 
@@ -209,13 +211,13 @@ void Game::processInputs()
 
         if (IsKeyPressed(KEY_X))
         {
-            m_battalionHandler.printDetails();
+            m_battalionHandler->printDetails();
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
-            m_battalionHandler.selectBattalion(mousePos, 5.0);
+            m_battalionHandler->selectBattalion(mousePos, 5.0);
         }
     }
 }

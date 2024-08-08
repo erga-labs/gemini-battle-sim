@@ -30,6 +30,8 @@ Battalion::Battalion(int id, Group group, BType btype, Vector2 center, const std
         };
         m_troops.push_back(troop);
     }
+
+    m_initialTroopCount = getTroopCount();
 }
 
 float Battalion::getActiveRatio(const Vector2 &position, float range) const

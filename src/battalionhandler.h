@@ -17,6 +17,8 @@ class BattalionHandler
 {
 
 public:
+    BattalionHandler();
+    ~BattalionHandler();
     /// @brief spawns battalions under the group provided
     void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos);
     /// @brief draw all the battalions
@@ -32,7 +34,7 @@ public:
     /// @brief selects the closest battalion to the position
     void selectBattalion(Vector2 position, float threshold);
     /// @brief displays the information of the selected battalion
-    void drawInfoPanel() const;
+    void drawInfoPanel(const Camera2D &camera) const;
 
 private:
     /// @brief get the target for the battalion provided
@@ -43,4 +45,6 @@ private:
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
+
+    Texture m_uiSpriteSheet;
 };
