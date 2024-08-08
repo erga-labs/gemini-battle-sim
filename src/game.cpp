@@ -167,25 +167,10 @@ void Game::processInputs()
         const Vector2 maxCamPos = Vector2Subtract(m_worldBounds, camPadding);
         m_camera.target = Vector2Clamp(m_camera.target, minCamPos, maxCamPos);
 
-        // static bool apiCalled = false;
-
-        // if (!apiCalled && IsKeyPressed(KEY_SPACE))
-        // {
-        //     TraceLog(LOG_WARNING, "Calling gemini");
-        //     call_getGeminiResponse();
-        //     apiCalled = true;
-        // }
-
-        // if (apiCalled)
-        // {
-        //     const auto response = val::take_ownership(getGeminiResponse());
-        //     if (!response.isNull())
-        //     {
-        //         apiCalled = false;
-        //         std::string promptResp = response["response"].as<std::string>();
-        //         TraceLog(LOG_WARNING, "Response from gemini: %s", promptResp.c_str());
-        //     }
-        // }
+        if (IsKeyPressed(KEY_SPACE))
+        {
+            m_state = (m_state == State::RUN_SIMULATION) ? State::PAUSE_SIMULATION : State::RUN_SIMULATION;
+        }
 
         if (IsKeyPressed(KEY_X))
         {
