@@ -5,6 +5,17 @@
 #include <algorithm>
 #include <sstream>
 
+BattalionHandler::BattalionHandler(Texture2D troops, Texture2D walls){
+    m_troops = troops;
+    m_walls = walls;
+}
+
+BattalionHandler::~BattalionHandler()
+{
+    UnloadTexture(m_troops);
+    UnloadTexture(m_walls);
+}
+
 void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos)
 {
     std::vector<std::shared_ptr<Battalion>> &vec = (group == Group::Attacker) ? m_attackerBattalions : m_defenderBattalions;
@@ -20,11 +31,11 @@ void BattalionHandler::drawAll() const
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->draw(b == m_selectedBattalion.lock());
+        b->draw(b == m_selectedBattalion.lock(), m_troops);
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->draw(b == m_selectedBattalion.lock());
+        b->draw(b == m_selectedBattalion.lock(), m_troops);
     }
 }
 

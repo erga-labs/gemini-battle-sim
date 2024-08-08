@@ -46,7 +46,9 @@ private:
     State m_state = State::WAITING_USER;
     int m_targetFPS;
 
-    BattalionHandler m_battalionHandler;
+    Texture2D cm_troops, cm_walls;  
+
+    BattalionHandler* m_battalionHandler;
 
     float m_cloudDrawOffset = 0.0;
     // created by `WorldGen`
