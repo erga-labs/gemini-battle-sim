@@ -173,12 +173,9 @@ void Battalion::removeDead() {
     }
 
     // Calculate the new center as the midpoint of the two furthest troops
-    Vector2 newCenter;
-    newCenter.x = (m_troops[furthestTroop1].position.x + m_troops[furthestTroop2].position.x) / 2.0f;
-    newCenter.y = (m_troops[furthestTroop1].position.y + m_troops[furthestTroop2].position.y) / 2.0f;
+    m_center.x = (m_troops[furthestTroop1].position.x + m_troops[furthestTroop2].position.x) / 2.0f;
+    m_center.y = (m_troops[furthestTroop1].position.y + m_troops[furthestTroop2].position.y) / 2.0f;
 
-    // Update m_center
-    m_center = newCenter;
 
 }
 
