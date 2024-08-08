@@ -17,6 +17,8 @@ class BattalionHandler
 {
 
 public:
+    BattalionHandler();
+    ~BattalionHandler();
     /// @brief spawns battalions under the group provided
     void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos);
     /// @brief draw all the battalions
@@ -43,4 +45,6 @@ private:
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
+
+    Texture m_uiSpriteSheet;
 };

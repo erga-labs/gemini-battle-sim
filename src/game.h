@@ -46,7 +46,7 @@ private:
     State m_state = State::WAITING_USER;
     int m_targetFPS;
 
-    BattalionHandler m_battalionHandler;
+    BattalionHandler *m_battalionHandler = nullptr;
 
     float m_cloudDrawOffset = 0.0;
     // created by `WorldGen`

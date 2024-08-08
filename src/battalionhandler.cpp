@@ -5,6 +5,16 @@
 #include <algorithm>
 #include <sstream>
 
+BattalionHandler::BattalionHandler()
+{
+    m_uiSpriteSheet = LoadTexture("assets/spritesheets/ui.png");
+}
+
+BattalionHandler::~BattalionHandler()
+{
+    UnloadTexture(m_uiSpriteSheet);
+}
+
 void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos)
 {
     std::vector<std::shared_ptr<Battalion>> &vec = (group == Group::Attacker) ? m_attackerBattalions : m_defenderBattalions;
@@ -143,11 +153,13 @@ void BattalionHandler::drawInfoPanel(const Camera2D &camera) const
     if (auto b = m_selectedBattalion.lock())
     {
         const Vector2 screenPos = GetWorldToScreen2D(b->m_center, camera);
-        const float panelWidth = 220;
+        const float panelWidth = 250;
 
         const float x = screenPos.x - panelWidth / 2;
         const float y = screenPos.y - 150;
 
+        const Color tintColor = (b->m_group == Group::Attacker) ? Color{255, 0, 0, 255} : Color{0, 0, 255, 255};
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ColorToInt(ColorTint(DARKGRAY, tintColor)));
         GuiPanel({x, y, panelWidth, 130}, nullptr);
 
         GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
@@ -159,10 +171,22 @@ void BattalionHandler::drawInfoPanel(const Camera2D &camera) const
         GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
         GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
 
-        GuiLabel({x + 10, y + 40, panelWidth - 20, 20}, TextFormat("Type: %s", ((b->m_btype == BType::Warrior) ? "Warrior" : "Archer")));
-        GuiLabel({x + 10, y + 60, panelWidth - 20, 20}, TextFormat("Group: %s", ((b->m_group == Group::Attacker) ? "Attacker" : "Defender")));
-        GuiLabel({x + 10, y + 80, panelWidth - 20, 20}, TextFormat("Center: %.2f, %.2f", b->m_center.x, b->m_center.y));
-        GuiLabel({x + 10, y + 100, panelWidth - 20, 20}, TextFormat("TroopCount: %d", b->getTroopCount()));
+        const char *text = TextFormat("Type: %s", ((b->m_btype == BType::Warrior) ? "Warrior" : "Archer"));
+        const Vector2 textSize = MeasureTextEx(GuiGetFont(), text, 16, 1);
+        GuiLabel({x + 10, y + 40, panelWidth - 20, 20}, text);
+
+        const Rectangle srcRect = (b->m_btype == BType::Warrior) ? Rectangle{8, 0, 8, 8} : Rectangle{0, 0, 8, 8};
+        DrawTexturePro(m_uiSpriteSheet, srcRect, {x + 15 + textSize.x, y + 40, 16, 16}, {0, 0}, 0, WHITE);
+
+        GuiLabel({x + 10, y + 60, panelWidth - 20, 20}, TextFormat("Center: %.2f, %.2f", b->m_center.x, b->m_center.y));
+
+        const int troopCount = b->getTroopCount();
+        const int iniTroopCount = b->getInitialTroopCount();
+        text = TextFormat("Troops: %.2f%% of %d", 100 * (float)troopCount / iniTroopCount, iniTroopCount);
+        GuiLabel({x + 10, y + 80, panelWidth - 20, 20}, text);
+
+        text = TextFormat("Troops: %d", troopCount);
+        GuiLabel({x + 10, y + 100, panelWidth - 20, 20}, text);
     }
 }
 

@@ -33,6 +33,7 @@ public:
     float getActiveRatio(const Vector2 &position, float range) const;
     float getLookoutRatio() const;
     int getTroopCount() const { return m_troops.size(); }
+    int getInitialTroopCount() const { return m_initialTroopCount; }
     void draw(bool selected) const;
     void update(float deltaTime);
 
@@ -50,6 +51,7 @@ private:
     std::vector<Troop> m_troops;
     std::weak_ptr<Battalion> m_target;
 
+    int m_initialTroopCount;
     float m_rotation;
     float m_cooldown;
 
