@@ -105,7 +105,8 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const {
     const int frameWidth = 16;
     const int frameHeight = 16;
 
-    DrawCircle(m_center.x, m_center.y, 0.5, BLACK);
+    // m_center Debug
+    // DrawCircle(m_center.x, m_center.y, 0.5, BLACK);
 
     for (const auto &troop : m_troops) {
         int startY = GetStartingYPosition(m_group, m_btype, troop.state);
@@ -133,14 +134,29 @@ void Battalion::update(float deltaTime) {
     rotate(deltaTime);
 
     for (auto &troop : m_troops) {
-        troop.frameCounter += deltaTime * 10; // Adjust speed of animation
-        if (troop.frameCounter >= 4) { // Assuming 4 frames per animation
+        
+        if (troop.state == IDLE) {
+            troop.currentFrame = 0;
+            troop.frameCounter = 0;
+            continue;
+        }
+
+        troop.frameCounter += deltaTime * 5; // Adjust speed of animation
+        if (troop.frameCounter >= 5) { // Assuming 4 frames per animation
             troop.frameCounter = 0;
         }
         troop.currentFrame = static_cast<int>(troop.frameCounter);
     }
 
+    if (!m_target.lock()) {
+        for (auto &troop : m_troops) {
+            troop.state = IDLE;
+        }
+    }
+
 }
+
+
 void Battalion::removeDead() {
     // Remove dead troops
     auto predicate = [&](const Troop &troop) {
@@ -157,25 +173,14 @@ void Battalion::removeDead() {
     }
 
     // Find the two furthest troops
-    float maxDistanceSqr = 0.0f;
-    size_t furthestTroop1 = 0;
-    size_t furthestTroop2 = 1;
+    Vector2 centroid = {0.0f, 0.0f};
 
-    for (size_t i = 0; i < m_troops.size(); ++i) {
-        for (size_t j = i + 1; j < m_troops.size(); ++j) {
-            float distanceSqr = Vector2DistanceSqr(m_troops[i].position, m_troops[j].position);
-            if (distanceSqr > maxDistanceSqr) {
-                maxDistanceSqr = distanceSqr;
-                furthestTroop1 = i;
-                furthestTroop2 = j;
-            }
-        }
+    for (const auto troop: m_troops){
+        centroid = Vector2Add(centroid, troop.position);
     }
 
-    // Calculate the new center as the midpoint of the two furthest troops
-    m_center.x = (m_troops[furthestTroop1].position.x + m_troops[furthestTroop2].position.x) / 2.0f;
-    m_center.y = (m_troops[furthestTroop1].position.y + m_troops[furthestTroop2].position.y) / 2.0f;
-
+    centroid = Vector2Scale(centroid, 1.0f / m_troops.size());
+    m_center = centroid;
 
 }
 
@@ -183,19 +188,6 @@ void Battalion::removeDead() {
 
 void Battalion::move(float deltaTime) {
     if (auto target = m_target.lock()) {
-
-        bool allEnemiesDead = std::all_of(target->m_troops.begin(), target->m_troops.end(), [](const Troop& troop) {
-            return troop.health <= 0;
-        });
-
-        if (allEnemiesDead) {
-            for (auto &troop : m_troops) {
-                troop.state = IDLE;
-            }
-            return;
-        }
-
-        TraceLog(LOG_WARNING, "Current Target troops - %d", target->m_troops.size());
 
         const float moveThreshold = 0.4;
         if (getActiveRatio(target->m_center, const_attackRange[(int)m_btype]) > moveThreshold) {
@@ -231,6 +223,7 @@ void Battalion::attack(float deltaTime) {
     }
 
     if (auto target = m_target.lock()) {
+
 
         for (auto &troop : m_troops) {
             Troop *targetTroop = nullptr;
