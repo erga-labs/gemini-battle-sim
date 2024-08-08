@@ -216,7 +216,9 @@ void Game::processInputs()
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
+            static const float devicePixelRatio = EM_ASM_DOUBLE({ return window.devicePixelRatio; });
+            const Vector2 screenMousePos = Vector2Scale(GetMousePosition(), devicePixelRatio);
+            const Vector2 mousePos = GetScreenToWorld2D(screenMousePos, m_camera);
             m_battalionHandler->selectBattalion(mousePos, 5.0);
         }
     }

@@ -8,6 +8,11 @@ Module.print = (...args) => {
 
 Module.canvas = document.getElementById("canvas");
 
+setTimeout(() => {
+    Module.canvas.style.width = Math.floor(Module.canvas.width / window.devicePixelRatio) + 'px';
+    Module.canvas.style.height = Math.floor(Module.canvas.height / window.devicePixelRatio) + 'px';
+}, 300);
+
 // used for stuff like telling the thing is being downloaded
 // if error occurs, this is chaned
 Module.setStatus = Module.print;
