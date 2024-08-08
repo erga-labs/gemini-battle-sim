@@ -21,10 +21,9 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     m_targetFPS = 60;
 
     GuiSetAlpha(0.8);
-    GuiLoadStyle("assets/style.txt.rgs");
     Font font = LoadFont("assets/AtariST8x16SystemFont.ttf");
     GuiSetFont(font);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
+    GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(RAYWHITE));
 
     setup();
 }
