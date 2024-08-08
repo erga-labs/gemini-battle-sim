@@ -171,7 +171,9 @@ void Battalion::rotate(float deltaTime)
         else if (deltaRotation < -180.0f)
             deltaRotation += 360.0f;
 
-        const float rotationStep = const_rotation[(int)m_btype] * deltaTime;
+        float rotationStep = const_rotation[(int)m_btype] * deltaTime;
+        rotationStep = (deltaRotation < rotationStep) ? deltaRotation : rotationStep;
+
         m_rotation += std::copysign(rotationStep, deltaRotation);
 
         // Rotate each troop around the battalion center by the new rotation
