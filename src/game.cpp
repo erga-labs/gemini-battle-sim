@@ -104,11 +104,10 @@ void Game::setup()
 
 void Game::drawFrame()
 {
-    if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
+    if (m_state == State::LOADING)
     {
-        const char *text = nullptr;
-        text = (m_state == State::WAITING_USER) ? "Waiting for user to set game state" : "Waiting for gemini to set game state";
-        const int fontSize = 30;
+        const char *text = "Loading... (You should only see this for a few frames)";
+        const int fontSize = 25;
         const int textWidth = MeasureText(text, fontSize);
         const Vector2 textSize = MeasureTextEx(GetFontDefault(), text, fontSize, fontSize / 10);
 
@@ -135,38 +134,14 @@ void Game::drawFrame()
 
 void Game::processInputs()
 {
-    if (m_state == State::WAITING_USER || m_state == State::WAITING_GEMINI)
+    if (m_state == State::LOADING)
     {
-        static float lastTime = GetTime();
-        const float callStep = 0.2;
+        call_getInitialGameState();
 
-        if (GetTime() - lastTime > callStep)
+        auto initState = val::take_ownership(getInitialGameState());
+        if (!initState.isNull())
         {
-            lastTime = GetTime();
-
-            call_getInitialGameState();
-            const auto response = val::take_ownership(getInitialGameState());
-
-            if (!response.isNull())
-            {
-                if (m_state == State::WAITING_USER)
-                {
-                    const bool dataSet = response["userDataSet"].as<bool>();
-                    if (dataSet)
-                    {
-                        m_state = State::WAITING_GEMINI;
-                    }
-                }
-                else
-                {
-                    const bool dataSet = response["aiDataSet"].as<bool>();
-                    if (dataSet)
-                    {
-                        // do something with the gameState
-                        m_state = State::RUN_SIMULATION;
-                    }
-                }
-            }
+            m_state = State::RUN_SIMULATION;
         }
     }
     else
