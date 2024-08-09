@@ -67,7 +67,7 @@ void Game::setup()
         .offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
         .target = {m_worldBounds.x / 2, m_worldBounds.y / 2},
         .rotation = 0.0,
-        .zoom = 10.0,
+        .zoom = 20.0,
     };
 
     const Vector2 positions[] = {
