@@ -18,7 +18,7 @@ class BattalionHandler
 
 public:
     /// @brief constructor
-    BattalionHandler(Texture2D troops, Texture2D walls);
+    BattalionHandler();
     /// @brief destructor
     ~BattalionHandler();
     /// @brief spawns battalions under the group provided
@@ -37,15 +37,10 @@ public:
     void selectBattalion(Vector2 position, float threshold);
     /// @brief displays the information of the selected battalion
     void drawInfoPanel(const Camera2D &camera) const;
-    /// @brief gets the textures for the battalions and walls
-    Texture2D getTextureTroop() { return m_troops; };
-    Texture2D getTextureWalls() { return m_walls; };
 
 private:
     /// @brief get the target for the battalion provided
     std::shared_ptr<Battalion> getTarget(std::shared_ptr<Battalion> battalion) const;
-    Texture2D m_troops;
-    Texture2D m_walls;
 
 private:
     std::vector<std::shared_ptr<Battalion>> m_attackerBattalions;
@@ -53,5 +48,7 @@ private:
 
     std::weak_ptr<Battalion> m_selectedBattalion;
 
+    Texture2D m_troopSpriteSheet;
+    Texture2D m_wallSpriteSheet;
     Texture m_uiSpriteSheet;
 };

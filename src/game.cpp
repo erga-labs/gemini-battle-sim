@@ -25,9 +25,6 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     GuiSetFont(font);
     GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(RAYWHITE));
 
-    cm_troops = LoadTexture("assets/spritesheets/troops.png");
-    cm_walls = LoadTexture("assets/spritesheets/world.png");
-
     setup();
 }
 
@@ -94,7 +91,7 @@ void Game::setup()
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = BType::Warrior, .troops = troops});
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = BType::Archer, .troops = troops});
 
-    m_battalionHandler = new BattalionHandler(cm_troops, cm_walls);
+    m_battalionHandler = new BattalionHandler();
     m_battalionHandler->spawn(Group::Attacker, attackerBattalions);
     m_battalionHandler->spawn(Group::Defender, defenderBattalions);
 
