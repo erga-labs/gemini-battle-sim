@@ -25,6 +25,9 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
     GuiSetFont(font);
     GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(RAYWHITE));
 
+    cm_troops = LoadTexture("assets/spritesheets/troops.png");
+    cm_walls = LoadTexture("assets/spritesheets/world.png");
+
     setup();
 }
 
@@ -91,7 +94,7 @@ void Game::setup()
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 3, .position = positions[2], .btype = BType::Warrior, .troops = troops});
     defenderBattalions.push_back(BattalionSpawnInfo{.id = 4, .position = positions[3], .btype = BType::Archer, .troops = troops});
 
-    m_battalionHandler = new BattalionHandler();
+    m_battalionHandler = new BattalionHandler(cm_troops, cm_walls);
     m_battalionHandler->spawn(Group::Attacker, attackerBattalions);
     m_battalionHandler->spawn(Group::Defender, defenderBattalions);
 
@@ -216,9 +219,7 @@ void Game::processInputs()
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
-            static const float devicePixelRatio = EM_ASM_DOUBLE({ return window.devicePixelRatio; });
-            const Vector2 screenMousePos = Vector2Scale(GetMousePosition(), devicePixelRatio);
-            const Vector2 mousePos = GetScreenToWorld2D(screenMousePos, m_camera);
+            const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), m_camera);
             m_battalionHandler->selectBattalion(mousePos, 5.0);
         }
     }

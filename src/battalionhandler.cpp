@@ -5,13 +5,18 @@
 #include <algorithm>
 #include <sstream>
 
-BattalionHandler::BattalionHandler()
+BattalionHandler::BattalionHandler(Texture2D troops, Texture2D walls)
 {
+    m_troops = troops;
+    m_walls = walls;
+
     m_uiSpriteSheet = LoadTexture("assets/spritesheets/ui.png");
 }
 
 BattalionHandler::~BattalionHandler()
 {
+    UnloadTexture(m_troops);
+    UnloadTexture(m_walls);
     UnloadTexture(m_uiSpriteSheet);
 }
 
@@ -30,11 +35,11 @@ void BattalionHandler::drawAll() const
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->draw(b == m_selectedBattalion.lock());
+        b->draw(b == m_selectedBattalion.lock(), m_troops);
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->draw(b == m_selectedBattalion.lock());
+        b->draw(b == m_selectedBattalion.lock(), m_troops);
     }
 }
 

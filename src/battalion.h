@@ -5,10 +5,25 @@
 #include <vector>
 #include <memory>
 
+enum TroopState
+{
+    MOVING,
+    ATTACKING,
+    IDLE,
+    MOVING_UP,
+    MOVING_DOWN,
+    ATTACKING_DOWN,
+    ATTACKING_UP
+};
+
 struct Troop
 {
     Vector2 position;
     float health;
+    int currentFrame;
+    TroopState state;
+    float frameCounter;
+    bool flipHorizontal;
 };
 
 enum class BType
@@ -34,7 +49,7 @@ public:
     float getLookoutRatio() const;
     int getTroopCount() const { return m_troops.size(); }
     int getInitialTroopCount() const { return m_initialTroopCount; }
-    void draw(bool selected) const;
+    void draw(bool selected, Texture2D spritesheet) const;
     void update(float deltaTime);
 
 private:
