@@ -72,7 +72,6 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     EndTextureMode();
 
     Texture out = renderTex.texture;
-    SetTextureFilter(out, TEXTURE_FILTER_POINT);
 
     // unloading stuff
     renderTex.texture.id = 0;

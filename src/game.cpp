@@ -174,6 +174,8 @@ void Game::processInputs()
         const float zoomDelta = 60 * GetMouseWheelMove() * GetFrameTime();
         m_camera.zoom = Clamp(m_camera.zoom + zoomDelta, minZoom, maxZoom);
 
+        SetTextureFilter(m_worldTexture, m_camera.zoom < 15.0f ? TEXTURE_FILTER_ANISOTROPIC_8X : TEXTURE_FILTER_POINT);
+
         Vector2 camMoveVec = {0, 0};
         camMoveVec.x -= IsKeyDown(KEY_A);
         camMoveVec.x += IsKeyDown(KEY_D);
