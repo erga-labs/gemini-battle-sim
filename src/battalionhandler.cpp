@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <sstream>
 
-BattalionHandler::BattalionHandler()
+BattalionHandler::BattalionHandler(Vector2 worldBounds)
+    : m_worldBounds(worldBounds)
 {
     m_troopSpriteSheet = LoadTexture("assets/spritesheets/troops.png");
     m_wallSpriteSheet = LoadTexture("assets/spritesheets/world.png");
@@ -23,10 +24,29 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 {
     std::vector<std::shared_ptr<Battalion>> &vec = (group == Group::Attacker) ? m_attackerBattalions : m_defenderBattalions;
 
-    for (const BattalionSpawnInfo &info : spawnInfos)
+    if (group == Group::Attacker)
     {
-        std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, info.btype, info.position, info.troops);
-        vec.push_back(battalion);
+        for (const BattalionSpawnInfo &info : spawnInfos)
+        {
+            BType btype = (BType)info.btype;
+            std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, info.troops);
+            vec.push_back(battalion);
+        }
+    }
+    else
+    {
+        for (const BattalionSpawnInfo &info : spawnInfos)
+        {
+            BType btype = (BType)info.btype;
+
+            std::vector<Vector2> shiftedTroops;
+            shiftedTroops.resize(info.troops.size());
+            std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
+                           { return Vector2Add(v, Vector2Scale(m_worldBounds, 0.5)); });
+
+            std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, shiftedTroops);
+            vec.push_back(battalion);
+        }
     }
 }
 
@@ -213,5 +233,3 @@ std::shared_ptr<Battalion> BattalionHandler::getTarget(std::shared_ptr<Battalion
 
     return newTarget;
 }
-
-// AtariST8x16SystemFont.ttf

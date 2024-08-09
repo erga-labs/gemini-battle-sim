@@ -12,14 +12,12 @@ class Game
 public:
     enum class State
     {
-        // waiting for the user to set the initial config
-        WAITING_USER = 0,
-        // waiting for gemini to set the initial config
-        WAITING_GEMINI = 1,
+        // loading (only for a single frame)
+        LOADING = 0,
         // simulation
-        RUN_SIMULATION = 2,
+        RUN_SIMULATION = 1,
         // simulation pause
-        PAUSE_SIMULATION = 3,
+        PAUSE_SIMULATION = 2,
     };
 
 public:
@@ -43,7 +41,7 @@ private:
 private:
     Camera2D m_camera;
     Vector2 m_worldBounds;
-    State m_state = State::WAITING_USER;
+    State m_state = State::LOADING;
     int m_targetFPS;
 
     BattalionHandler *m_battalionHandler = nullptr;

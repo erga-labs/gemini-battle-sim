@@ -1,24 +1,17 @@
 
 #pragma
 
+#include "src/battalionspawninfo.h"
 #include "src/battalion.h"
 #include <vector>
 #include <raylib/raylib.h>
-
-struct BattalionSpawnInfo
-{
-    int id;
-    Vector2 position;
-    BType btype;
-    std::vector<Vector2> troops;
-};
 
 class BattalionHandler
 {
 
 public:
     /// @brief constructor
-    BattalionHandler();
+    BattalionHandler(Vector2 worldBounds);
     /// @brief destructor
     ~BattalionHandler();
     /// @brief spawns battalions under the group provided
@@ -47,6 +40,8 @@ private:
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
+
+    Vector2 m_worldBounds;
 
     Texture2D m_troopSpriteSheet;
     Texture2D m_wallSpriteSheet;
