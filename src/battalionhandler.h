@@ -5,6 +5,9 @@
 #include "src/battalion.h"
 #include <vector>
 #include <raylib/raylib.h>
+#include <memory>
+#include "src/wall.h"
+
 
 class BattalionHandler
 {
@@ -30,6 +33,10 @@ public:
     void selectBattalion(Vector2 position, float threshold);
     /// @brief displays the information of the selected battalion
     void drawInfoPanel(const Camera2D &camera) const;
+    /// @brief initialize walls
+    void initWalls();
+    /// @brief draws the wall
+    void drawWall() const;
 
 private:
     /// @brief get the target for the battalion provided
@@ -38,6 +45,8 @@ private:
 private:
     std::vector<std::shared_ptr<Battalion>> m_attackerBattalions;
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
+
+    std::vector<std::shared_ptr<Wall>> m_defenderWalls;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
 
