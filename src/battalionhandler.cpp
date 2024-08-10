@@ -11,6 +11,7 @@ BattalionHandler::BattalionHandler(Vector2 worldBounds)
     m_troopSpriteSheet = LoadTexture("assets/spritesheets/troops.png");
     m_wallSpriteSheet = LoadTexture("assets/spritesheets/world.png");
     m_uiSpriteSheet = LoadTexture("assets/spritesheets/ui.png");
+    initWalls();
 }
 
 BattalionHandler::~BattalionHandler()
@@ -35,6 +36,7 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
     }
     else
     {
+        // addWallsToGroup(group, m_defenderWalls);
         for (const BattalionSpawnInfo &info : spawnInfos)
         {
             BType btype = (BType)info.btype;
@@ -52,6 +54,7 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
 void BattalionHandler::drawAll() const
 {
+    TraceLog(LOG_WARNING, "Number of Walls: %d", m_defenderWalls.size());
     for (const auto &b : m_attackerBattalions)
     {
         b->draw(b == m_selectedBattalion.lock(), m_troopSpriteSheet);
@@ -60,17 +63,47 @@ void BattalionHandler::drawAll() const
     {
         b->draw(b == m_selectedBattalion.lock(), m_troopSpriteSheet);
     }
+
+    drawWall();
+}
+
+void BattalionHandler::drawWall() const
+{
+    for (const auto &wall : m_defenderWalls)
+    {
+        float totalHealth = 500.0f;
+        float baseX = 0;
+        float baseY = 96;
+
+        if (wall->health < totalHealth * 0.66)
+        {
+            baseX = 32;
+        }
+        else if (wall->health < totalHealth * 0.33)
+        {
+            baseX = 64;
+        }
+
+        Rectangle wallSourceRec = {baseX, baseY, 32, 16}; // Assuming wall sprite starts at 0,0 in the texture
+        Rectangle wallDestRec = wall->getBoundingBox();
+        DrawTexturePro(m_wallSpriteSheet, wallSourceRec, wallDestRec, Vector2{0, 0}, 0.0f, WHITE);
+    }
+}
+
+void BattalionHandler::initWalls()
+{
+    m_defenderWalls.push_back(std::make_shared<Wall>(Vector2{10, 10}, Vector2{4, 2}));
 }
 
 void BattalionHandler::updateAll(float deltaTime)
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->update(deltaTime);
+        b->update(deltaTime, m_defenderWalls);
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->update(deltaTime);
+        b->update(deltaTime, m_defenderWalls);
     }
 }
 
@@ -118,6 +151,11 @@ void BattalionHandler::removeDead()
     vec = &m_defenderBattalions;
     auto it2 = std::remove_if(vec->begin(), vec->end(), predicate);
     vec->erase(it2, vec->end());
+
+    // remove walls
+    auto it3 = std::remove_if(m_defenderWalls.begin(), m_defenderWalls.end(), [](std::shared_ptr<Wall> wall)
+                              { return wall->health <= 0; });
+    m_defenderWalls.erase(it3, m_defenderWalls.end());
 }
 
 void BattalionHandler::printDetails() const

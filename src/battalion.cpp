@@ -142,13 +142,15 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
     }
 }
 
-void Battalion::update(float deltaTime)
+void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls)
 {
     m_cooldown -= deltaTime;
     removeDead();
     move(deltaTime);
     attack(deltaTime);
     rotate(deltaTime);
+
+    m_walls = walls;
 
     for (auto &troop : m_troops)
     {
@@ -191,20 +193,39 @@ void Battalion::removeDead()
     // If there are less than 2 troops, do nothing more
     if (m_troops.size() < 2)
     {
-        m_center = m_troops[0].position;
+        if (!m_troops.empty())
+        {
+            m_center = m_troops[0].position;
+        }
         return;
     }
 
-    // Find the two furthest troops
-    Vector2 centroid = {0.0f, 0.0f};
-
-    for (const auto troop : m_troops)
+    // Calculate the new m_center using the average of x and y positions
+    Vector2 sum = {0.0f, 0.0f};
+    for (const auto &troop : m_troops)
     {
-        centroid = Vector2Add(centroid, troop.position);
+        sum = Vector2Add(sum, troop.position);
+    }
+    Vector2 new_center = Vector2Scale(sum, 1.0f / m_troops.size());
+
+    // Adjust troop positions relative to the new center within a defined radius
+    float maxRadius = 5.0f; // Define the maximum distance a troop can be from the new center
+
+    for (auto &troop : m_troops)
+    {
+        Vector2 direction = Vector2Subtract(troop.position, new_center);
+        float distance = Vector2Length(direction);
+
+        if (distance > maxRadius)
+        {
+            direction = Vector2Normalize(direction);
+            direction = Vector2Scale(direction, maxRadius);
+            troop.position = Vector2Add(new_center, direction);
+        }
     }
 
-    centroid = Vector2Scale(centroid, 1.0f / m_troops.size());
-    m_center = centroid;
+    // Update m_center to the new_center
+    m_center = new_center;
 }
 
 void Battalion::move(float deltaTime)
@@ -242,6 +263,61 @@ void Battalion::move(float deltaTime)
                 troop.flipHorizontal = false; // Moving right
             }
         }
+        return;
+    }
+
+    if (m_group == Group::Defender)
+    {
+        return;
+    }
+    // move towards closest available wall with least hp
+    if (!m_walls.empty())
+    {
+        std::shared_ptr<Wall> targetWall = nullptr;
+        float closestDistSqr = std::numeric_limits<float>::max();
+        for (const auto &wall : m_walls)
+        {
+            const float distSqr = Vector2DistanceSqr(m_center, wall->position);
+            if (distSqr < closestDistSqr)
+            {
+                closestDistSqr = distSqr;
+                targetWall = wall;
+            }
+        }
+
+        if (targetWall)
+        {
+            m_target_wall = targetWall;
+            Vector2 movementVec = Vector2Subtract(targetWall->position, m_center);
+            movementVec = Vector2Normalize(movementVec);
+            movementVec = Vector2Scale(movementVec, const_speed[(int)m_btype] * deltaTime);
+
+            if (Vector2Distance(m_center, targetWall->position) < const_attackRange[(int)m_btype])
+            {
+                for (auto &troop : m_troops)
+                {
+                    troop.state = ATTACKING;
+                }
+                return;
+            }
+
+            m_center = Vector2Add(m_center, movementVec);
+            for (auto &troop : m_troops)
+            {
+                troop.position = Vector2Add(troop.position, movementVec);
+                troop.state = MOVING;
+
+                // Determine horizontal flip based on movement direction
+                if (movementVec.x < 0)
+                {
+                    troop.flipHorizontal = true; // Moving left
+                }
+                else
+                {
+                    troop.flipHorizontal = false; // Moving right
+                }
+            }
+        }
     }
 }
 
@@ -252,9 +328,9 @@ void Battalion::attack(float deltaTime)
         return;
     }
 
+    // Check if there's a battalion target first
     if (auto target = m_target.lock())
     {
-
         for (auto &troop : m_troops)
         {
             Troop *targetTroop = nullptr;
@@ -283,10 +359,38 @@ void Battalion::attack(float deltaTime)
                 troop.state = IDLE;
             }
         }
-
-        m_cooldown = const_cooldown[(int)m_btype];
     }
+    else if (auto wallTarget = m_target_wall.lock()) // If no battalion target, attack the wall
+    {
+        if (m_group == Group::Defender)
+        {
+            return;
+        }
+        TraceLog(LOG_WARNING, "Attacking wall");
+        for (auto &troop : m_troops)
+        {
+            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            float distSqr = Vector2DistanceSqr(m_center, wallTarget->position);
+
+            if (distSqr < attackRangeSqr)
+            {
+                TraceLog(LOG_WARNING, "Wall in range, Attacking. Wall health: %f", wallTarget->health);
+                troop.state = ATTACKING;
+                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    wallTarget->health -= const_damage[(int)m_btype];
+                }
+            }
+            else
+            {
+                troop.state = IDLE;
+            }
+        }
+    }
+
+    m_cooldown = const_cooldown[(int)m_btype];
 }
+
 void Battalion::rotate(float deltaTime)
 {
     if (auto target = m_target.lock())

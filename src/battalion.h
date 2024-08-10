@@ -4,6 +4,7 @@
 #include <raylib/raylib.h>
 #include <vector>
 #include <memory>
+#include "src/wall.h"
 
 enum TroopState
 {
@@ -51,7 +52,7 @@ public:
     int getTroopCount() const { return m_troops.size(); }
     int getInitialTroopCount() const { return m_initialTroopCount; }
     void draw(bool selected, Texture2D spritesheet) const;
-    void update(float deltaTime);
+    void update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls);
 
 private:
     void removeDead();
@@ -66,6 +67,9 @@ private:
     Vector2 m_center;
     std::vector<Troop> m_troops;
     std::weak_ptr<Battalion> m_target;
+    std::vector<std::shared_ptr<Wall>> m_walls;
+
+    std::weak_ptr<Wall> m_target_wall;
 
     int m_initialTroopCount;
     float m_rotation;
