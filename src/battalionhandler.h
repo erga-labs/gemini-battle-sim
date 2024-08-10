@@ -8,7 +8,6 @@
 #include <memory>
 #include "src/wall.h"
 
-
 class BattalionHandler
 {
 

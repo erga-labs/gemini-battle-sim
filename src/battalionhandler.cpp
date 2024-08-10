@@ -78,7 +78,8 @@ void BattalionHandler::drawWall() const
         if (wall->health < totalHealth * 0.66)
         {
             baseX = 32;
-        }else if (wall->health < totalHealth * 0.33)
+        }
+        else if (wall->health < totalHealth * 0.33)
         {
             baseX = 64;
         }

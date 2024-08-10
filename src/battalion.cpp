@@ -316,7 +316,6 @@ void Battalion::move(float deltaTime)
     }
 }
 
-
 void Battalion::attack(float deltaTime)
 {
     if (m_cooldown > 0.0)
