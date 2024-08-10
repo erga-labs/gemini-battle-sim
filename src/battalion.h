@@ -47,6 +47,7 @@ public:
     /// @brief returns the ratio [0.0 to 1.0] of troops that are within threshold range of position
     float getActiveRatio(const Vector2 &position, float range) const;
     float getLookoutRatio() const;
+    float getLookoutRatio(std::shared_ptr<Battalion> battalion) const;
     int getTroopCount() const { return m_troops.size(); }
     int getInitialTroopCount() const { return m_initialTroopCount; }
     void draw(bool selected, Texture2D spritesheet) const;

@@ -63,6 +63,11 @@ float Battalion::getLookoutRatio() const
     return 0.0;
 }
 
+float Battalion::getLookoutRatio(std::shared_ptr<Battalion> battalion) const
+{
+    return getActiveRatio(battalion->m_center, const_lookoutRange[(int)m_btype]);
+}
+
 Rectangle GetFrameRectangle(int startX, int startY, int frameWidth, int frameHeight, int frameIndex)
 {
     return Rectangle{(float)(startX + frameIndex * frameWidth), (float)startY, (float)frameWidth, (float)frameHeight};

@@ -84,7 +84,10 @@ void BattalionHandler::updateTargets()
         if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
-            battalion->m_target = target;
+            if (battalion->getLookoutRatio(target))
+            {
+                battalion->m_target = target;
+            }
         }
     }
     for (auto &battalion : m_defenderBattalions)
@@ -92,7 +95,10 @@ void BattalionHandler::updateTargets()
         if (battalion->getLookoutRatio() < threshold)
         {
             std::shared_ptr<Battalion> target = getTarget(battalion);
-            battalion->m_target = target;
+            if (battalion->getLookoutRatio(target))
+            {
+                battalion->m_target = target;
+            }
         }
     }
 }
