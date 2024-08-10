@@ -108,7 +108,7 @@ int GetStartingYPosition(Group group, BType btype, TroopState state)
 void Battalion::draw(bool selected, Texture2D spritesheet) const
 {
     const Color color = const_colors[(int)m_group][(int)m_btype];
-    const uint8_t alpha = selected ? 30 : 10;
+    const uint8_t alpha = selected ? 20 : 2;
 
     const Rectangle rect = {m_center.x, m_center.y, (float)getTroopCount(), 1.0};
     const Vector2 origin = {(float)getTroopCount() / 2, 0.5};
@@ -121,7 +121,8 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
     const int frameHeight = 16;
 
     // m_center Debug
-    // DrawCircle(m_center.x, m_center.y, 0.5, BLACK);
+    DrawCircleV(m_center, const_attackRange[(int)m_btype], {color.r, color.g, color.b, alpha});
+    DrawCircleV(m_center, const_lookoutRange[(int)m_btype], {color.r, color.g, color.b, alpha});
 
     for (const auto &troop : m_troops)
     {
