@@ -137,11 +137,6 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
     }
 }
 
-void Battalion::drawWalls(Texture2D spritesheet) 
-{
-    TraceLog(LOG_WARNING, "Walls: %d", m_walls.size());
-    
-}
 
 void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls)
 {
@@ -204,16 +199,6 @@ void Battalion::removeDead() {
     }
     centroid = Vector2Scale(centroid, 1.0f / m_troops.size());
 
-    // Adjust troop positions if they are too far from the centroid
-    const float maxDistance = 2.0f;  // Maximum allowed distance from the centroid
-    for (auto &troop : m_troops) {
-        float distance = Vector2Distance(troop.position, centroid);
-        if (distance > maxDistance) {
-            Vector2 direction = Vector2Normalize(Vector2Subtract(troop.position, centroid));
-            troop.position = Vector2Add(centroid, Vector2Scale(direction, maxDistance));
-        }
-    }
-
     // Recalculate the centroid based on adjusted positions
     centroid = {0.0f, 0.0f};
     for (const auto &troop : m_troops) {
@@ -260,6 +245,9 @@ void Battalion::move(float deltaTime)
             }
         }
     }else{
+        // if (m_group == Group::Defender) {
+        //     return;
+        // }
         // move towards closest available wall with least hp
         if (!m_walls.empty()) {
             std::shared_ptr<Wall> targetWall = nullptr;
@@ -342,6 +330,10 @@ void Battalion::attack(float deltaTime)
     }
     else if (auto wallTarget = m_target_wall.lock()) // If no battalion target, attack the wall
     {
+        // if (m_group == Group::Defender) {
+        //     return;
+        // }
+        TraceLog(LOG_WARNING, "Attacking wall");
         for (auto &troop : m_troops)
         {
             const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
@@ -349,6 +341,7 @@ void Battalion::attack(float deltaTime)
 
             if (distSqr < attackRangeSqr)
             {
+                TraceLog(LOG_WARNING, "Wall in range, Attacking. Wall health: %f", wallTarget->health);
                 troop.state = ATTACKING;
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
