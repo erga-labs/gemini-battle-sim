@@ -250,10 +250,10 @@ void BattalionHandler::drawInfoPanel(const Camera2D &camera) const
 
         const int troopCount = b->getTroopCount();
         const int iniTroopCount = b->getInitialTroopCount();
-        text = TextFormat("Troops: %.2f%% of %d", 100 * (float)troopCount / iniTroopCount, iniTroopCount);
+        text = TextFormat("TroopPercent: %.2f%%", 100 * (float)troopCount / iniTroopCount);
         GuiLabel({x + 10, y + 80, panelWidth - 20, 20}, text);
 
-        text = TextFormat("Troops: %d", troopCount);
+        text = TextFormat("TroopCount: %d", troopCount);
         GuiLabel({x + 10, y + 100, panelWidth - 20, 20}, text);
     }
 }
