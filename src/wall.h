@@ -6,7 +6,7 @@ struct Wall {
     float health;
 
     // Constructor
-    Wall(Vector2 pos, Vector2 sz, float hp = 100.0f) : position(pos), size(sz), health(hp) {}
+    Wall(Vector2 pos, Vector2 sz, float hp = 500.0f) : position(pos), size(sz), health(hp) {}
 
     // Function to get the bounding box
     Rectangle getBoundingBox() const {

@@ -71,16 +71,16 @@ void BattalionHandler::drawWall() const
 {
     for (const auto &wall : m_defenderWalls)
     {
+        float totalHealth = 500.0f;
         float baseX = 0;
         float baseY = 96;
 
-        if (wall->health < 66.0f)
+        if (wall->health < totalHealth * 0.66)
         {
-            baseX += 32;
-        }
-        else if (wall->health < 33.0f)
+            baseX = 32;
+        }else if (wall->health < totalHealth * 0.33)
         {
-            baseX += 64;
+            baseX = 64;
         }
 
         Rectangle wallSourceRec = {baseX, baseY, 32, 16}; // Assuming wall sprite starts at 0,0 in the texture
