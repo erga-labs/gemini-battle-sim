@@ -16,6 +16,8 @@ public:
     BattalionHandler(Vector2 worldBounds);
     /// @brief destructor
     ~BattalionHandler();
+    /// @brief returns true if the game is finished
+    bool isGameFinished(Group &winner) const;
     /// @brief spawns battalions under the group provided
     void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos);
     /// @brief draw all the battalions

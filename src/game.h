@@ -18,6 +18,8 @@ public:
         RUN_SIMULATION = 1,
         // simulation pause
         PAUSE_SIMULATION = 2,
+        // game end state
+        GAME_OVER = 3,
     };
 
 public:

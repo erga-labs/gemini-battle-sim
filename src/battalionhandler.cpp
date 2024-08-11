@@ -21,6 +21,22 @@ BattalionHandler::~BattalionHandler()
     UnloadTexture(m_uiSpriteSheet);
 }
 
+bool BattalionHandler::isGameFinished(Group &winner) const
+{
+    // TODO: change this after castle is added
+    if (m_attackerBattalions.size() == 0)
+    {
+        winner = Group::Defender;
+        return true;
+    }
+    if (m_defenderBattalions.size() == 0)
+    {
+        winner = Group::Attacker;
+        return true;
+    }
+    return false;
+}
+
 void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos)
 {
     std::vector<std::shared_ptr<Battalion>> &vec = (group == Group::Attacker) ? m_attackerBattalions : m_defenderBattalions;

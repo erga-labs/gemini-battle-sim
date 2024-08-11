@@ -50,6 +50,12 @@ void Game::processFrame()
         m_battalionHandler->removeDead();
         m_battalionHandler->updateTargets();
         m_battalionHandler->updateAll(1.0f / m_targetFPS);
+
+        Group winner;
+        if (m_battalionHandler->isGameFinished(winner))
+        {
+            m_state = State::GAME_OVER;
+        }
     }
 
     BeginDrawing();
@@ -102,6 +108,18 @@ void Game::drawFrame()
 
         ClearBackground(BLACK);
         DrawText(text, (GetScreenWidth() - textSize.x) / 2, (GetScreenHeight() - textSize.y) / 2, fontSize, RED);
+    }
+    else if (m_state == State::GAME_OVER)
+    {
+        Group winner;
+        m_battalionHandler->isGameFinished(winner);
+
+        GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
+        GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 48);
+
+        ClearBackground(BLACK);
+        GuiLabel({0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, "Game Over\nRefresh to replay");
     }
     else
     {
