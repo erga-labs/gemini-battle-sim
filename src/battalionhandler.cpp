@@ -24,16 +24,22 @@ BattalionHandler::~BattalionHandler()
 bool BattalionHandler::isGameFinished(Group &winner) const
 {
     // TODO: change this after castle is added
+
     if (m_attackerBattalions.size() == 0)
     {
         winner = Group::Defender;
         return true;
     }
+
     if (m_defenderBattalions.size() == 0)
     {
-        winner = Group::Attacker;
-        return true;
+        if (m_defenderWalls.size() == 0)
+        {
+            winner = Group::Attacker;
+            return true;
+        }
     }
+
     return false;
 }
 
