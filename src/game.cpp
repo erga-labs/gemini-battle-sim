@@ -117,9 +117,12 @@ void Game::drawFrame()
         GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
         GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
         GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 48);
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(PURPLE));
+
+        const char* text = winner == Group::Attacker ? "You won !!\nRefresh to replay" : "You lost !!\nRefresh to replay";
 
         ClearBackground(BLACK);
-        GuiLabel({0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, "Game Over\nRefresh to replay");
+        GuiLabel({0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, text);
     }
     else
     {
