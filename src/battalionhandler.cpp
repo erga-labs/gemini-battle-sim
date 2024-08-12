@@ -69,8 +69,10 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
             std::vector<Vector2> shiftedTroops;
             shiftedTroops.resize(info.troops.size());
+
+
             std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
-                           { return Vector2Add(v, Vector2Scale(m_worldBounds, 0.25)); });
+                           { return Vector2Subtract(m_defenderCastle->position, Vector2Scale(v, 0.8)); });
 
             std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, shiftedTroops);
             vec.push_back(battalion);
