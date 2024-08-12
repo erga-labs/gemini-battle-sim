@@ -63,5 +63,6 @@ private:
 
     Texture2D m_troopSpriteSheet;
     Texture2D m_wallSpriteSheet;
+    Texture2D m_wallCornerSpriteSheet;
     Texture m_uiSpriteSheet;
 };

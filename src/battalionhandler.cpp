@@ -11,6 +11,7 @@ BattalionHandler::BattalionHandler(Vector2 worldBounds)
     m_troopSpriteSheet = LoadTexture("assets/spritesheets/troops.png");
     m_wallSpriteSheet = LoadTexture("assets/spritesheets/world.png");
     m_uiSpriteSheet = LoadTexture("assets/spritesheets/ui.png");
+    m_wallCornerSpriteSheet = LoadTexture("assets/spritesheets/filler.png");
     initCastle();
     initWalls();
 }
@@ -119,6 +120,15 @@ void BattalionHandler::drawWall() const
     {
         wall.get()->draw(m_wallSpriteSheet);
     }
+
+    if (areWallsUp()){
+        const Vector2 castlePos = m_defenderCastle->position;
+        
+        const Vector2 cornerWallPos = {castlePos.x - 5.5f, castlePos.y - 6.5f};
+
+        DrawTexturePro(m_wallCornerSpriteSheet, Rectangle{0, 0, 8, 8}, {cornerWallPos.x, cornerWallPos.y, 1, 1}, {0, 0}, 0, WHITE);
+    }
+
 }
 
 void BattalionHandler::drawCastle() const

@@ -3,13 +3,13 @@
 #include <raylib/raymath.h>
 #include <algorithm>
 
-const float const_attackRange[] = {3.0f, 5.0f};
-const float const_lookoutRange[] = {18.0f, 25.0f};
-const float const_speed[] = {5.0f, 4.0f};
-const float const_health[] = {30.0f, 15.0f};
-const float const_damage[] = {10.0f, 5.0f};
-const float const_accuracy[] = {0.8f, 0.6f};
-const float const_cooldown[] = {0.5f, 1.0f};
+const float const_attackRange[] = {3.0f, 10.0f};      
+const float const_lookoutRange[] = {18.0f, 25.0f}; 
+const float const_speed[] = {5.0f, 3.0f};           
+const float const_health[] = {22.5f, 15.0f};         
+const float const_damage[] = {10.0f, 13.5f};        
+const float const_accuracy[] = {0.69f, 0.9f};         
+const float const_cooldown[] = {0.7f, 2.0f};         
 const float const_rotation[] = {90.0f, 70.0f};
 
 const Color const_colors[2][2] = {

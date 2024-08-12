@@ -3,7 +3,7 @@
 #include <raylib/raymath.h>
 #include <algorithm>
 
-#define TOTAL_HEALTH 100.0f
+#define TOTAL_HEALTH 1250.0f
 
 struct Wall
 {
