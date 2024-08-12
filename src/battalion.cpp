@@ -171,7 +171,7 @@ void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>>
         troop.currentFrame = static_cast<int>(troop.frameCounter);
     }
 
-    if (!m_target.lock())
+    if (m_target.expired() && m_target_wall.expired())
     {
         for (auto &troop : m_troops)
         {
