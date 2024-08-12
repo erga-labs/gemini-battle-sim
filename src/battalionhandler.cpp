@@ -93,22 +93,7 @@ void BattalionHandler::drawWall() const
 {
     for (const auto &wall : m_defenderWalls)
     {
-        float totalHealth = 500.0f;
-        float baseX = 0;
-        float baseY = 96;
-
-        if (wall->health < totalHealth * 0.66)
-        {
-            baseX = 32;
-        }
-        else if (wall->health < totalHealth * 0.33)
-        {
-            baseX = 64;
-        }
-
-        Rectangle wallSourceRec = {baseX, baseY, 32, 16}; // Assuming wall sprite starts at 0,0 in the texture
-        Rectangle wallDestRec = wall->getBoundingBox();
-        DrawTexturePro(m_wallSpriteSheet, wallSourceRec, wallDestRec, Vector2{0, 0}, 0.0f, WHITE);
+        wall.get()->draw(m_wallSpriteSheet);
     }
 }
 
@@ -175,9 +160,10 @@ void BattalionHandler::removeDead()
     vec->erase(it2, vec->end());
 
     // remove walls
-    auto it3 = std::remove_if(m_defenderWalls.begin(), m_defenderWalls.end(), [](std::shared_ptr<Wall> wall)
-                              { return wall->health <= 0; });
-    m_defenderWalls.erase(it3, m_defenderWalls.end());
+    if (Wall::getHP() <= 0)
+    {
+        m_defenderWalls.clear();
+    }
 }
 
 void BattalionHandler::printDetails() const

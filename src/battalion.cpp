@@ -375,11 +375,10 @@ void Battalion::attack(float deltaTime)
 
             if (distSqr < attackRangeSqr)
             {
-                TraceLog(LOG_WARNING, "Wall in range, Attacking. Wall health: %f", wallTarget->health);
                 troop.state = ATTACKING;
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
-                    wallTarget->health -= const_damage[(int)m_btype];
+                    Wall::takeDamage(const_damage[(int)m_btype]);
                 }
             }
             else
