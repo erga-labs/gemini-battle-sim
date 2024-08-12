@@ -24,8 +24,6 @@ BattalionHandler::~BattalionHandler()
 
 bool BattalionHandler::isGameFinished(Group &winner) const
 {
-    // TODO: change this after castle is added
-
     if (m_attackerBattalions.size() == 0)
     {
         winner = Group::Defender;
@@ -47,7 +45,7 @@ bool BattalionHandler::isGameFinished(Group &winner) const
     return false;
 }
 
-void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos)
+void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos, bool flag)
 {
     std::vector<std::shared_ptr<Battalion>> &vec = (group == Group::Attacker) ? m_attackerBattalions : m_defenderBattalions;
 
@@ -62,7 +60,6 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
     }
     else
     {
-        // addWallsToGroup(group, m_defenderWalls);
         for (const BattalionSpawnInfo &info : spawnInfos)
         {
             BType btype = (BType)info.btype;
@@ -70,12 +67,32 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
             std::vector<Vector2> shiftedTroops;
             shiftedTroops.resize(info.troops.size());
 
-
-            std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
-                           { return Vector2Subtract(m_defenderCastle->position, Vector2Scale(v, 0.8)); });
+            if (flag)
+            {
+                std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
+                               { return Vector2{m_defenderCastle->position.x / 1.1f - v.x, m_defenderCastle->position.y - v.y}; });
+            }
+            else
+            {
+                std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
+                               { return Vector2{m_defenderCastle->position.x - v.x, m_defenderCastle->position.y / 1.2f - v.y}; });
+            }
 
             std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, shiftedTroops);
             vec.push_back(battalion);
+        }
+
+        int id = spawnInfos.back().id;
+
+        if (flag)
+        {
+            std::vector<BattalionSpawnInfo> newSpawnInfos;
+            for (auto info : spawnInfos)
+            {
+                info.id = ++id;
+                newSpawnInfos.push_back(info);
+            }
+            spawn(Group::Defender, newSpawnInfos, false);
         }
     }
 }

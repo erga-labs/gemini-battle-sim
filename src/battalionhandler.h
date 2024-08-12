@@ -20,7 +20,7 @@ public:
     /// @brief returns true if the game is finished
     bool isGameFinished(Group &winner) const;
     /// @brief spawns battalions under the group provided
-    void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos);
+    void spawn(Group group, const std::vector<BattalionSpawnInfo> &spawnInfos, bool flag = true);
     /// @brief draw all the battalions
     void drawAll() const;
     /// @brief calls each battalion's update method
