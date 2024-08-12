@@ -18,8 +18,9 @@ void emscriptenMainLoop(void *arg)
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 {
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetTraceLogLevel(LOG_WARNING);
+    // SetTraceLogLevel(LOG_WARNING);
     InitWindow(windowWidth, windowHeight, windowTitle);
+    InitAudioDevice();
     m_targetFPS = 60;
 
     GuiSetAlpha(0.8);
@@ -33,8 +34,10 @@ Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 Game::~Game()
 {
     delete m_battalionHandler;
+    UnloadSound(m_winSound);
     UnloadTexture(m_cloudTexture);
     UnloadTexture(m_worldTexture);
+    CloseAudioDevice();
     CloseWindow();
 }
 
@@ -56,6 +59,14 @@ void Game::processFrame()
         if (m_battalionHandler->isGameFinished(winner))
         {
             m_state = State::GAME_OVER;
+            if (winner == Group::Attacker)
+            {
+                PlaySound(m_winSound);
+            }
+            else
+            {
+                PlaySound(m_lossSound);
+            }
         }
     }
 
@@ -96,6 +107,9 @@ void Game::setup()
     WorldGen worldGen;
     m_worldTexture = worldGen.createWorldTexture(m_worldBounds.x, m_worldBounds.y);
     m_cloudTexture = worldGen.createCloudTexture();
+
+    m_winSound = LoadSound("assets/sfx/win.wav");
+    m_lossSound = LoadSound("assets/sfx/loss.wav");
 }
 
 void Game::drawFrame()
@@ -120,7 +134,7 @@ void Game::drawFrame()
         GuiSetStyle(DEFAULT, TEXT_LINE_SPACING, 48);
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(PURPLE));
 
-        const char* text = winner == Group::Attacker ? "You won !!\nRefresh to replay" : "You lost !!\nRefresh to replay";
+        const char *text = winner == Group::Attacker ? "You won !!\nRefresh to replay" : "You lost !!\nRefresh to replay";
 
         ClearBackground(BLACK);
         GuiLabel({0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()}, text);

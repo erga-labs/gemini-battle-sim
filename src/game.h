@@ -51,4 +51,6 @@ private:
     float m_cloudDrawOffset = 0.0;
     // created by `WorldGen`
     Texture m_worldTexture, m_cloudTexture;
+
+    Sound m_winSound, m_lossSound;
 };
