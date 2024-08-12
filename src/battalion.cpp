@@ -234,17 +234,26 @@ void Battalion::move(float deltaTime)
     if (auto target = m_target.lock())
     {
 
+        Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
+
         const float moveThreshold = 0.4;
         if (getActiveRatio(target->m_center, const_attackRange[(int)m_btype]) > moveThreshold)
         {
             for (auto &troop : m_troops)
             {
                 troop.state = ATTACKING;
+                if (movementVec.x < 0)
+                {
+                    troop.flipHorizontal = true;
+                }
+                else
+                {
+                    troop.flipHorizontal = false;
+                }
             }
             return;
         }
 
-        Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
         movementVec = Vector2Normalize(movementVec);
         movementVec = Vector2Scale(movementVec, const_speed[(int)m_btype] * deltaTime);
 
@@ -298,6 +307,14 @@ void Battalion::move(float deltaTime)
                 for (auto &troop : m_troops)
                 {
                     troop.state = ATTACKING;
+                    if (movementVec.x < 0)
+                    {
+                        troop.flipHorizontal = true;
+                    }
+                    else
+                    {
+                        troop.flipHorizontal = false;
+                    }
                 }
                 return;
             }
@@ -349,7 +366,17 @@ void Battalion::attack(float deltaTime)
             const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
             if (closestDistSqr < attackRangeSqr)
             {
+                const Vector2 direction = Vector2Subtract(m_center, targetTroop->position);
                 troop.state = ATTACKING;
+                if (direction.x < 0)
+                {
+                    troop.flipHorizontal = true;
+                }
+                else
+                {
+                    troop.flipHorizontal = false;
+                }
+
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
                     targetTroop->health -= const_damage[(int)m_btype];
@@ -375,8 +402,19 @@ void Battalion::attack(float deltaTime)
 
             if (distSqr < attackRangeSqr)
             {
+                const Vector2 direction = Vector2Subtract(m_center, wallTarget->position);
+
                 TraceLog(LOG_WARNING, "Wall in range, Attacking. Wall health: %f", wallTarget->health);
                 troop.state = ATTACKING;
+                if (direction.x < 0)
+                {
+                    troop.flipHorizontal = true;
+                }
+                else
+                {
+                    troop.flipHorizontal = false;
+                }
+
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
                     wallTarget->health -= const_damage[(int)m_btype];
