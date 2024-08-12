@@ -37,5 +37,5 @@ void Wall::draw(Texture2D spritesheet) const
 
     Rectangle wallSourceRec = {baseX, baseY, 32, 16}; // Assuming wall sprite starts at 0,0 in the texture
     Rectangle wallDestRec = getBoundingBox();
-    DrawTexturePro(spritesheet, wallSourceRec, wallDestRec, Vector2{0, 0}, 0.0f, WHITE);
+    DrawTexturePro(spritesheet, wallSourceRec, wallDestRec, Vector2{0, 0}, rotation, WHITE);
 }

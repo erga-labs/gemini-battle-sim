@@ -143,15 +143,17 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
     }
 }
 
-void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls)
+void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls, const std::shared_ptr<Castle> &castle, bool wallsUp)
 {
     m_cooldown -= deltaTime;
     removeDead();
+    m_walls = walls;
+    m_target_castle = castle;
+    m_wallsUp = wallsUp;
+
     move(deltaTime);
     attack(deltaTime);
     rotate(deltaTime);
-
-    m_walls = walls;
 
     for (auto &troop : m_troops)
     {
@@ -231,6 +233,57 @@ void Battalion::removeDead()
 
 void Battalion::move(float deltaTime)
 {
+
+    if (!m_wallsUp)
+    {
+        if (!(m_group == Group::Defender && movedToCastle))
+        {
+            if (auto castle = m_target_castle.lock())
+            {
+
+                Vector2 movementVec = Vector2Subtract(castle->position, m_center);
+                movementVec = Vector2Normalize(movementVec);
+                movementVec = Vector2Scale(movementVec, const_speed[(int)m_btype] * deltaTime);
+
+                if (Vector2Distance(m_center, castle->position) < const_attackRange[(int)m_btype])
+                {
+
+                    if (m_group == Group::Attacker)
+                    {
+                        for (auto &troop : m_troops)
+                        {
+                            troop.state = ATTACKING;
+                        }
+                    }
+                    else
+                    {
+                        movedToCastle = true;
+                    }
+
+                    return;
+                }
+
+                m_center = Vector2Add(m_center, movementVec);
+                for (auto &troop : m_troops)
+                {
+                    troop.position = Vector2Add(troop.position, movementVec);
+                    troop.state = MOVING;
+
+                    // Determine horizontal flip based on movement direction
+                    if (movementVec.x < 0)
+                    {
+                        troop.flipHorizontal = true; // Moving left
+                    }
+                    else
+                    {
+                        troop.flipHorizontal = false; // Moving right
+                    }
+                }
+            }
+            return;
+        }
+    }
+
     if (auto target = m_target.lock())
     {
 
@@ -324,12 +377,43 @@ void Battalion::move(float deltaTime)
 
 void Battalion::attack(float deltaTime)
 {
+
     if (m_cooldown > 0.0)
     {
         return;
     }
 
     // Check if there's a battalion target first
+
+    if (auto castle = m_target_castle.lock())
+    {
+        if (m_group == Group::Defender)
+        {
+            return;
+        }
+
+        for (auto &troop : m_troops)
+        {
+            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            float distSqr = Vector2DistanceSqr(m_center, castle->position);
+
+            if (distSqr < attackRangeSqr)
+            {
+                troop.state = ATTACKING;
+                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    TraceLog(LOG_WARNING, "Attacking castle, HP - %f", castle.get()->health);
+                    castle.get()->takeDamage(const_damage[(int)m_btype]);
+                }
+            }
+            else
+            {
+                troop.state = IDLE;
+            }
+        }
+
+    }
+
     if (auto target = m_target.lock())
     {
         for (auto &troop : m_troops)

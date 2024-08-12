@@ -11,6 +11,7 @@ BattalionHandler::BattalionHandler(Vector2 worldBounds)
     m_troopSpriteSheet = LoadTexture("assets/spritesheets/troops.png");
     m_wallSpriteSheet = LoadTexture("assets/spritesheets/world.png");
     m_uiSpriteSheet = LoadTexture("assets/spritesheets/ui.png");
+    initCastle();
     initWalls();
 }
 
@@ -35,8 +36,11 @@ bool BattalionHandler::isGameFinished(Group &winner) const
     {
         if (m_defenderWalls.size() == 0)
         {
-            winner = Group::Attacker;
-            return true;
+            if (m_defenderCastle->health <= 0)
+            {
+                winner = Group::Attacker;
+                return true;
+            }
         }
     }
 
@@ -87,6 +91,8 @@ void BattalionHandler::drawAll() const
     }
 
     drawWall();
+    
+    drawCastle();
 }
 
 void BattalionHandler::drawWall() const
@@ -97,20 +103,75 @@ void BattalionHandler::drawWall() const
     }
 }
 
+void BattalionHandler::drawCastle() const
+{
+    m_defenderCastle->draw(m_wallSpriteSheet);
+}
+
 void BattalionHandler::initWalls()
 {
-    m_defenderWalls.push_back(std::make_shared<Wall>(Vector2{10, 10}, Vector2{4, 2}));
+    Vector2 castlePos = m_defenderCastle->position;
+    Vector2 wallSize = {4.0f, 2.0f}; 
+    float wallWidth = 4.0f;
+    float wallGap = 2.0f; 
+
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x - wallWidth, castlePos.y},
+        wallSize, 
+        0.0f));
+    
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x - wallWidth, castlePos.y - wallGap},
+        wallSize, 
+        0.0f));
+    
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x - wallWidth, castlePos.y - wallWidth},
+        wallSize, 
+        0.0f));
+    
+    // Horizontal walls
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x, castlePos.y - (wallWidth + wallGap)},
+        wallSize, // Horizontal wall: large width, small height
+        90.0f));
+    
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x + wallGap , castlePos.y - (wallWidth + wallGap)},
+        wallSize, 
+        90.0f));
+
+    m_defenderWalls.push_back(std::make_shared<Wall>(
+        Vector2{castlePos.x + wallWidth , castlePos.y - (wallWidth + wallGap)},
+        wallSize, 
+        90.0f));
+
+    // m_defenderWalls.push_back(
+    //     std::make_shared<Wall>(
+    //         Vector2{10, 10},
+    //         Vector2{4, 2},
+    //         0.0f));
+}
+
+void BattalionHandler::initCastle()
+{
+    m_defenderCastle = std::make_shared<Castle>(Vector2{m_worldBounds.x - 2, m_worldBounds.y - 1}, 750.0f);
+}
+
+bool BattalionHandler::areWallsUp() const
+{
+    return m_defenderWalls.size() > 0;
 }
 
 void BattalionHandler::updateAll(float deltaTime)
 {
     for (const auto &b : m_attackerBattalions)
     {
-        b->update(deltaTime, m_defenderWalls);
+        b->update(deltaTime, m_defenderWalls, m_defenderCastle, areWallsUp());
     }
     for (const auto &b : m_defenderBattalions)
     {
-        b->update(deltaTime, m_defenderWalls);
+        b->update(deltaTime, m_defenderWalls, m_defenderCastle, areWallsUp());
     }
 }
 

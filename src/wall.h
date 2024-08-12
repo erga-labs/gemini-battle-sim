@@ -8,11 +8,12 @@
 struct Wall
 {
     Vector2 position, size;
+    float rotation;
     // Use size for width and height
-    static float health;
+    static inline float health;
 
     // Constructor
-    Wall(Vector2 pos, Vector2 sz) : position(pos), size(sz) { Wall::setHP(TOTAL_HEALTH); }
+    Wall(Vector2 pos, Vector2 sz, float rotation) : position(pos), size(sz), rotation(rotation) { Wall::setHP(TOTAL_HEALTH); }
 
     // Function to set the health
     static void takeDamage(float damage);

@@ -7,6 +7,7 @@
 #include <raylib/raylib.h>
 #include <memory>
 #include "src/wall.h"
+#include "src/castle.h"
 
 class BattalionHandler
 {
@@ -36,8 +37,14 @@ public:
     void drawInfoPanel(const Camera2D &camera) const;
     /// @brief initialize walls
     void initWalls();
+    /// @brief initialize castle
+    void initCastle();
     /// @brief draws the wall
     void drawWall() const;
+    /// @brief draws the castle
+    void drawCastle() const;
+    /// @brief checks if walls are up
+    bool areWallsUp() const;
 
 private:
     /// @brief get the target for the battalion provided
@@ -47,6 +54,7 @@ private:
     std::vector<std::shared_ptr<Battalion>> m_attackerBattalions;
     std::vector<std::shared_ptr<Battalion>> m_defenderBattalions;
 
+    std::shared_ptr<Castle> m_defenderCastle;
     std::vector<std::shared_ptr<Wall>> m_defenderWalls;
 
     std::weak_ptr<Battalion> m_selectedBattalion;
