@@ -48,7 +48,7 @@ InitialGameState parseInitialGameState(emscripten::val rawData)
 
         std::string btype = b["type"].as<std::string>();
         tolower(btype);
-        info.btype = (btype == "warrior") ? 0 : 1;
+        info.btype = (btype == "warrior") ? 1 : 0;
 
         // auto center = emscripten::vecFromJSArray<float>(b["avgCenter"]);
         // info.position = {center[0], center[1]};

@@ -318,35 +318,6 @@ void Battalion::attack(float deltaTime)
 
     // Check if there's a battalion target first
 
-    if (auto castle = m_target_castle.lock())
-    {
-        if (m_group == Group::Defender)
-        {
-            return;
-        }
-
-        for (auto &troop : m_troops)
-        {
-            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
-            float distSqr = Vector2DistanceSqr(m_center, castle->position);
-
-            if (distSqr < attackRangeSqr)
-            {
-                troop.state = TroopState::ATTACKING;
-                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
-                {
-                    TraceLog(LOG_WARNING, "Attacking castle, HP - %f", castle.get()->health);
-                    castle.get()->takeDamage(const_damage[(int)m_btype]);
-                }
-            }
-            else
-            {
-                troop.state = TroopState::IDLE;
-            }
-        }
-
-    }
-
     if (auto target = m_target.lock())
     {
         for (auto &troop : m_troops)
@@ -381,6 +352,7 @@ void Battalion::attack(float deltaTime)
             }
         }
     }
+
     else if (auto wallTarget = m_target_wall.lock()) // If no battalion target, attack the wall
     {
         if (m_group == Group::Defender)
@@ -403,6 +375,33 @@ void Battalion::attack(float deltaTime)
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
                     Wall::takeDamage(const_damage[(int)m_btype]);
+                }
+            }
+            else
+            {
+                troop.state = TroopState::IDLE;
+            }
+        }
+    }
+
+    else if (auto castle = m_target_castle.lock())
+    {
+        if (m_group == Group::Defender)
+        {
+            return;
+        }
+
+        for (auto &troop : m_troops)
+        {
+            const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
+            float distSqr = Vector2DistanceSqr(m_center, castle->position);
+
+            if (distSqr < attackRangeSqr)
+            {
+                troop.state = TroopState::ATTACKING;
+                if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
+                {
+                    castle.get()->takeDamage(const_damage[(int)m_btype]);
                 }
             }
             else
