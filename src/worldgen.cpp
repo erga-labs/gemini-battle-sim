@@ -11,6 +11,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     // weed texture: 2 to 3
     // grass texture: 4 to 5
     // grass overlay: 6
+    // golden tile: 7
     const Rectangle srcRects[] = {
         {0, 32, 16, 16},
         {16, 32, 16, 16},
@@ -19,6 +20,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
         {0, 0, 16, 16},
         {16, 0, 16, 16},
         {0, 48, 16, 16},
+        {0, 112, 16, 16},
     };
 
     const std::vector<Tile> worldData = WorldGen::createWorld(boundX, boundY);
@@ -31,6 +33,10 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     {
         for (int x = 0; x < boundX; x++)
         {
+            if (x < 8 && y > boundY - 8) {
+                DrawTexturePro(worldSpriteSheet, srcRects[7], {x * crispFactor, y * crispFactor, crispFactor, crispFactor}, {0, 0}, 0, WHITE);
+                continue;
+            }
             // const Tile tile = worldData[x + y * boundX];
             // const int texIndex = GetRandomValue((int)tile * 2, (int)tile * 2 + 1);
             // const Texture tex = assets[texIndex];
