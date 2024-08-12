@@ -54,16 +54,42 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
     {
         for (const BattalionSpawnInfo &info : spawnInfos)
         {
+            std::vector<Vector2> shiftedTroops;
+            shiftedTroops.resize(info.troops.size());
+
+            if (flag)
+            {
+
+                std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
+                               { return Vector2{v.x, v.y}; });
+            }
+            else
+            {
+                std::transform(info.troops.begin(), info.troops.end(), shiftedTroops.begin(), [&](Vector2 v)
+                               { return Vector2{v.x + 3, v.y + 3}; });
+            }
             BType btype = (BType)info.btype;
-            std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, info.troops);
+            std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, shiftedTroops);
             vec.push_back(battalion);
+        }
+
+        int id = spawnInfos.back().id;
+
+        if (flag)
+        {
+            std::vector<BattalionSpawnInfo> newSpawnInfos;
+            for (auto info : spawnInfos)
+            {
+                info.id = ++id;
+                newSpawnInfos.push_back(info);
+            }
+            spawn(Group::Attacker, newSpawnInfos, false);
         }
     }
     else
     {
         for (const BattalionSpawnInfo &info : spawnInfos)
         {
-            BType btype = (BType)info.btype;
 
             std::vector<Vector2> shiftedTroops;
             shiftedTroops.resize(info.troops.size());
@@ -79,6 +105,7 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
                                { return Vector2{m_defenderCastle->position.x - v.x, m_defenderCastle->position.y / 1.2f - v.y}; });
             }
 
+            BType btype = (BType)info.btype;
             std::shared_ptr<Battalion> battalion = std::make_shared<Battalion>(info.id, group, btype, shiftedTroops);
             vec.push_back(battalion);
         }
@@ -121,14 +148,14 @@ void BattalionHandler::drawWall() const
         wall.get()->draw(m_wallSpriteSheet);
     }
 
-    if (areWallsUp()){
+    if (areWallsUp())
+    {
         const Vector2 castlePos = m_defenderCastle->position;
-        
+
         const Vector2 cornerWallPos = {castlePos.x - 5.5f, castlePos.y - 6.5f};
 
         DrawTexturePro(m_wallCornerSpriteSheet, Rectangle{0, 0, 8, 8}, {cornerWallPos.x, cornerWallPos.y, 1, 1}, {0, 0}, 0, WHITE);
     }
-
 }
 
 void BattalionHandler::drawCastle() const
