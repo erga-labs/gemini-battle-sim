@@ -23,7 +23,7 @@ public:
     };
 
 public:
-    Game(int windowWidth, int windowHeight, const char *windowTitle = "Ant Simulation");
+    Game(int windowWidth, int windowHeight, const char *windowTitle);
     ~Game();
     void startGameLoop();
     void processFrame();

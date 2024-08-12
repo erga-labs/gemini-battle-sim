@@ -81,7 +81,7 @@ void Game::processFrame()
 
 void Game::setup()
 {
-    m_worldBounds = {80, 45};
+    m_worldBounds = {100, 60};
     m_camera = {
         .offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
         .target = {m_worldBounds.x / 2, m_worldBounds.y / 2},
@@ -187,7 +187,7 @@ void Game::processInputs()
         camMoveVec = Vector2Scale(camMoveVec, 600.0f / m_camera.zoom * GetFrameTime());
         m_camera.target = Vector2Add(m_camera.target, camMoveVec);
 
-        Vector2 camPadding = {15, 15};
+        Vector2 camPadding = {30, 30};
         camPadding = Vector2Scale(camPadding, 1 / m_camera.zoom);
         camPadding = Vector2Multiply(camPadding, {16, 9});
         const Vector2 minCamPos = camPadding;

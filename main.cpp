@@ -5,13 +5,8 @@
 
 Game *game = nullptr;
 
-extern "C"
-{
-    // functions to be exposed here
-}
-
 int main()
 {
-    game = new Game(800, 450);
+    game = new Game(1280, 720, "Battle Simulation w/ Gemini");
     game->startGameLoop();
 }
