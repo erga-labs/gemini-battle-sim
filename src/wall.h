@@ -12,6 +12,6 @@ struct Wall
     // Function to get the bounding box
     Rectangle getBoundingBox() const
     {
-        return Rectangle{position.x, position.y, size.x, size.y};
+        return Rectangle{position.x - size.x / 2, position.y - size.y / 2, size.x, size.y};
     }
 };
