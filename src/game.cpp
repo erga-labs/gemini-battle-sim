@@ -18,6 +18,7 @@ void emscriptenMainLoop(void *arg)
 Game::Game(int windowWidth, int windowHeight, const char *windowTitle)
 {
     // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetTraceLogLevel(LOG_WARNING);
     InitWindow(windowWidth, windowHeight, windowTitle);
     m_targetFPS = 60;
 
@@ -154,7 +155,6 @@ void Game::processInputs()
             auto gameState = parseInitialGameState(initState);
             m_battalionHandler->spawn(Group::Attacker, gameState.attackerBattalions);
             m_battalionHandler->spawn(Group::Defender, gameState.defenderBattalions);
-            TraceLog(LOG_WARNING, "userBCount: %d | aiBCount: %d", gameState.attackerBattalions.size(), gameState.defenderBattalions.size());
             m_state = State::RUN_SIMULATION;
         }
     }

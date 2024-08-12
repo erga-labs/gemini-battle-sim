@@ -6,7 +6,7 @@
 #include <memory>
 #include "src/wall.h"
 
-enum TroopState
+enum class TroopState
 {
     MOVING,
     ATTACKING,

@@ -29,7 +29,7 @@ Battalion::Battalion(int id, Group group, BType btype, const std::vector<Vector2
             .position = position,
             .health = const_health[(int)m_btype],
             .currentFrame = 0,
-            .state = IDLE,
+            .state = TroopState::IDLE,
             .frameCounter = 0.0f,
             .flipHorizontal = false,
         };
@@ -75,34 +75,8 @@ Rectangle GetFrameRectangle(int startX, int startY, int frameWidth, int frameHei
 
 int GetStartingYPosition(Group group, BType btype, TroopState state)
 {
-    int baseY = 0;
-
-    if (group == Group::Attacker)
-    {
-        baseY = 48;
-    }
-    else if (group == Group::Defender)
-    {
-        baseY = 208;
-    }
-
-    switch (state)
-    {
-    case MOVING:
-        return baseY;
-    case MOVING_UP:
-        return baseY + 16;
-    case MOVING_DOWN:
-        return baseY + 32;
-    case ATTACKING:
-        return baseY + 48;
-    case ATTACKING_DOWN:
-        return baseY + 64;
-    case ATTACKING_UP:
-        return baseY + 80;
-    default:
-        return baseY;
-    }
+    const int baseY = (group == Group::Attacker) ? 48 : 208;
+    return baseY + (state == TroopState::ATTACKING ? 48 : 0);
 }
 
 void Battalion::draw(bool selected, Texture2D spritesheet) const
@@ -126,8 +100,8 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
 
     for (const auto &troop : m_troops)
     {
-        int startY = GetStartingYPosition(m_group, m_btype, troop.state);
-        int startX = (m_btype == BType::Archer) ? 0 : 96;
+        const int startY = GetStartingYPosition(m_group, m_btype, troop.state);
+        const int startX = (m_btype == BType::Archer) ? 0 : 96;
         Rectangle sourceRec = GetFrameRectangle(startX, startY, frameWidth, frameHeight, troop.currentFrame);
 
         if (troop.flipHorizontal)
@@ -135,11 +109,9 @@ void Battalion::draw(bool selected, Texture2D spritesheet) const
             sourceRec.width = -frameWidth; // Flip horizontally
         }
 
-        Rectangle destRec = {troop.position.x, troop.position.y, desiredWidth, desiredHeight}; // Scale to desired size
-        Vector2 origin = {desiredWidth / 2, desiredHeight / 2};                                // Center the sprite
-        float rotation = 0.0f;
-
-        DrawTexturePro(spritesheet, sourceRec, destRec, origin, rotation, WHITE);
+        const Rectangle destRec = {troop.position.x, troop.position.y, desiredWidth, desiredHeight}; // Scale to desired size
+        const Vector2 origin = {desiredWidth / 2, desiredHeight / 2};                                // Center the sprite
+        DrawTexturePro(spritesheet, sourceRec, destRec, origin, 0.0f, WHITE);
     }
 }
 
@@ -155,8 +127,7 @@ void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>>
 
     for (auto &troop : m_troops)
     {
-
-        if (troop.state == IDLE)
+        if (troop.state == TroopState::IDLE)
         {
             troop.currentFrame = 0;
             troop.frameCounter = 0;
@@ -175,7 +146,7 @@ void Battalion::update(float deltaTime, const std::vector<std::shared_ptr<Wall>>
     {
         for (auto &troop : m_troops)
         {
-            troop.state = IDLE;
+            troop.state = TroopState::IDLE;
         }
     }
 }
@@ -192,12 +163,9 @@ void Battalion::removeDead()
     m_troops.erase(it, m_troops.end());
 
     // If there are less than 2 troops, do nothing more
-    if (m_troops.size() < 2)
+    if (m_troops.size() == 1)
     {
-        if (!m_troops.empty())
-        {
-            m_center = m_troops[0].position;
-        }
+        m_center = m_troops[0].position;
         return;
     }
 
@@ -207,33 +175,13 @@ void Battalion::removeDead()
     {
         sum = Vector2Add(sum, troop.position);
     }
-    Vector2 new_center = Vector2Scale(sum, 1.0f / m_troops.size());
-
-    // Adjust troop positions relative to the new center within a defined radius
-    float maxRadius = 5.0f; // Define the maximum distance a troop can be from the new center
-
-    for (auto &troop : m_troops)
-    {
-        Vector2 direction = Vector2Subtract(troop.position, new_center);
-        float distance = Vector2Length(direction);
-
-        if (distance > maxRadius)
-        {
-            direction = Vector2Normalize(direction);
-            direction = Vector2Scale(direction, maxRadius);
-            troop.position = Vector2Add(new_center, direction);
-        }
-    }
-
-    // Update m_center to the new_center
-    m_center = new_center;
+    m_center = Vector2Scale(sum, 1.0f / m_troops.size());
 }
 
 void Battalion::move(float deltaTime)
 {
     if (auto target = m_target.lock())
     {
-
         Vector2 movementVec = Vector2Subtract(target->m_center, m_center);
 
         const float moveThreshold = 0.4;
@@ -241,15 +189,8 @@ void Battalion::move(float deltaTime)
         {
             for (auto &troop : m_troops)
             {
-                troop.state = ATTACKING;
-                if (movementVec.x < 0)
-                {
-                    troop.flipHorizontal = true;
-                }
-                else
-                {
-                    troop.flipHorizontal = false;
-                }
+                troop.state = TroopState::ATTACKING;
+                troop.flipHorizontal = movementVec.x < 0.0f;
             }
             return;
         }
@@ -261,17 +202,8 @@ void Battalion::move(float deltaTime)
         for (auto &troop : m_troops)
         {
             troop.position = Vector2Add(troop.position, movementVec);
-            troop.state = MOVING;
-
-            // Determine horizontal flip based on movement direction
-            if (movementVec.x < 0)
-            {
-                troop.flipHorizontal = true; // Moving left
-            }
-            else
-            {
-                troop.flipHorizontal = false; // Moving right
-            }
+            troop.state = TroopState::MOVING;
+            troop.flipHorizontal = movementVec.x < 0.0f;
         }
         return;
     }
@@ -306,15 +238,8 @@ void Battalion::move(float deltaTime)
             {
                 for (auto &troop : m_troops)
                 {
-                    troop.state = ATTACKING;
-                    if (movementVec.x < 0)
-                    {
-                        troop.flipHorizontal = true;
-                    }
-                    else
-                    {
-                        troop.flipHorizontal = false;
-                    }
+                    troop.state = TroopState::ATTACKING;
+                    troop.flipHorizontal = movementVec.x < 0.0f;
                 }
                 return;
             }
@@ -323,17 +248,8 @@ void Battalion::move(float deltaTime)
             for (auto &troop : m_troops)
             {
                 troop.position = Vector2Add(troop.position, movementVec);
-                troop.state = MOVING;
-
-                // Determine horizontal flip based on movement direction
-                if (movementVec.x < 0)
-                {
-                    troop.flipHorizontal = true; // Moving left
-                }
-                else
-                {
-                    troop.flipHorizontal = false; // Moving right
-                }
+                troop.state = TroopState::MOVING;
+                troop.flipHorizontal = movementVec.x < 0.0f;
             }
         }
     }
@@ -367,15 +283,8 @@ void Battalion::attack(float deltaTime)
             if (closestDistSqr < attackRangeSqr)
             {
                 const Vector2 direction = Vector2Subtract(m_center, targetTroop->position);
-                troop.state = ATTACKING;
-                if (direction.x < 0)
-                {
-                    troop.flipHorizontal = true;
-                }
-                else
-                {
-                    troop.flipHorizontal = false;
-                }
+                troop.state = TroopState::ATTACKING;
+                troop.flipHorizontal = direction.x < 0.0f;
 
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
@@ -384,7 +293,7 @@ void Battalion::attack(float deltaTime)
             }
             else
             {
-                troop.state = IDLE;
+                troop.state = TroopState::IDLE;
             }
         }
     }
@@ -394,7 +303,7 @@ void Battalion::attack(float deltaTime)
         {
             return;
         }
-        TraceLog(LOG_WARNING, "Attacking wall");
+
         for (auto &troop : m_troops)
         {
             const float attackRangeSqr = const_attackRange[(int)m_btype] * const_attackRange[(int)m_btype];
@@ -404,16 +313,8 @@ void Battalion::attack(float deltaTime)
             {
                 const Vector2 direction = Vector2Subtract(m_center, wallTarget->position);
 
-                TraceLog(LOG_WARNING, "Wall in range, Attacking. Wall health: %f", wallTarget->health);
-                troop.state = ATTACKING;
-                if (direction.x < 0)
-                {
-                    troop.flipHorizontal = true;
-                }
-                else
-                {
-                    troop.flipHorizontal = false;
-                }
+                troop.state = TroopState::ATTACKING;
+                troop.flipHorizontal = direction.x < 0.0f;
 
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
@@ -422,7 +323,7 @@ void Battalion::attack(float deltaTime)
             }
             else
             {
-                troop.state = IDLE;
+                troop.state = TroopState::IDLE;
             }
         }
     }

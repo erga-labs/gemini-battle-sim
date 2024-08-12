@@ -76,7 +76,6 @@ void BattalionHandler::spawn(Group group, const std::vector<BattalionSpawnInfo> 
 
 void BattalionHandler::drawAll() const
 {
-    TraceLog(LOG_WARNING, "Number of Walls: %d", m_defenderWalls.size());
     for (const auto &b : m_attackerBattalions)
     {
         b->draw(b == m_selectedBattalion.lock(), m_troopSpriteSheet);
