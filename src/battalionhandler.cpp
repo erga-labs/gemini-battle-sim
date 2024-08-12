@@ -90,7 +90,7 @@ void BattalionHandler::drawAll() const
     }
 
     drawWall();
-    
+
     drawCastle();
 }
 
@@ -110,39 +110,39 @@ void BattalionHandler::drawCastle() const
 void BattalionHandler::initWalls()
 {
     Vector2 castlePos = m_defenderCastle->position;
-    Vector2 wallSize = {4.0f, 2.0f}; 
+    Vector2 wallSize = {4.0f, 2.0f};
     float wallWidth = 4.0f;
-    float wallGap = 2.0f; 
+    float wallGap = 2.0f;
 
     m_defenderWalls.push_back(std::make_shared<Wall>(
         Vector2{castlePos.x - wallWidth, castlePos.y},
-        wallSize, 
+        wallSize,
         0.0f));
-    
+
     m_defenderWalls.push_back(std::make_shared<Wall>(
         Vector2{castlePos.x - wallWidth, castlePos.y - wallGap},
-        wallSize, 
+        wallSize,
         0.0f));
-    
+
     m_defenderWalls.push_back(std::make_shared<Wall>(
         Vector2{castlePos.x - wallWidth, castlePos.y - wallWidth},
-        wallSize, 
+        wallSize,
         0.0f));
-    
+
     // Horizontal walls
     m_defenderWalls.push_back(std::make_shared<Wall>(
         Vector2{castlePos.x, castlePos.y - (wallWidth + wallGap)},
         wallSize, // Horizontal wall: large width, small height
         90.0f));
-    
+
     m_defenderWalls.push_back(std::make_shared<Wall>(
-        Vector2{castlePos.x + wallGap , castlePos.y - (wallWidth + wallGap)},
-        wallSize, 
+        Vector2{castlePos.x + wallGap, castlePos.y - (wallWidth + wallGap)},
+        wallSize,
         90.0f));
 
     m_defenderWalls.push_back(std::make_shared<Wall>(
-        Vector2{castlePos.x + wallWidth , castlePos.y - (wallWidth + wallGap)},
-        wallSize, 
+        Vector2{castlePos.x + wallWidth, castlePos.y - (wallWidth + wallGap)},
+        wallSize,
         90.0f));
 
     // m_defenderWalls.push_back(

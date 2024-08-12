@@ -4,7 +4,8 @@
 #include <raylib/raymath.h>
 #include <algorithm>
 
-struct Castle {
+struct Castle
+{
     Vector2 position;
     float health;
 
@@ -12,8 +13,8 @@ struct Castle {
 
     void draw(Texture2D spritesheet);
 
-    void takeDamage(float damage) {
-         health -= damage; 
+    void takeDamage(float damage)
+    {
+        health -= damage;
     }
-
 };

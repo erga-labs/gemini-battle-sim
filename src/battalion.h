@@ -54,9 +54,9 @@ public:
     int getInitialTroopCount() const { return m_initialTroopCount; }
     void draw(bool selected, Texture2D spritesheet) const;
     void update(float deltaTime,
-     const std::vector<std::shared_ptr<Wall>> &walls,
-     const std::shared_ptr<Castle> &castle,
-     bool wallsUp);
+                const std::vector<std::shared_ptr<Wall>> &walls,
+                const std::shared_ptr<Castle> &castle,
+                bool wallsUp);
 
 private:
     void removeDead();

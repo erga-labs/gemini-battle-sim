@@ -201,7 +201,7 @@ void Battalion::move(float deltaTime)
                     {
                         for (auto &troop : m_troops)
                         {
-                            troop.state = ATTACKING;
+                            troop.state = TroopState::ATTACKING;
                         }
                     }
                     else
@@ -216,7 +216,7 @@ void Battalion::move(float deltaTime)
                 for (auto &troop : m_troops)
                 {
                     troop.position = Vector2Add(troop.position, movementVec);
-                    troop.state = MOVING;
+                    troop.state = TroopState::MOVING;
 
                     // Determine horizontal flip based on movement direction
                     if (movementVec.x < 0)
@@ -332,7 +332,7 @@ void Battalion::attack(float deltaTime)
 
             if (distSqr < attackRangeSqr)
             {
-                troop.state = ATTACKING;
+                troop.state = TroopState::ATTACKING;
                 if ((float)rand() / RAND_MAX < const_accuracy[(int)m_btype])
                 {
                     TraceLog(LOG_WARNING, "Attacking castle, HP - %f", castle.get()->health);
@@ -341,7 +341,7 @@ void Battalion::attack(float deltaTime)
             }
             else
             {
-                troop.state = IDLE;
+                troop.state = TroopState::IDLE;
             }
         }
 

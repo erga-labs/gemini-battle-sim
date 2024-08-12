@@ -1,8 +1,7 @@
 #include "castle.h"
 
-
-
-void Castle::draw(Texture2D spritesheet) {
+void Castle::draw(Texture2D spritesheet)
+{
     // Assuming width and height of the castle after scaling
     float castleWidth = 4.0f;
     float castleHeight = 4.0f; // Adjust this based on the combined height of both blocks
@@ -17,4 +16,3 @@ void Castle::draw(Texture2D spritesheet) {
     // Draw the lower block
     DrawTexturePro(spritesheet, Rectangle{32, 64, 32, 16}, Rectangle{posX, posY + castleHeight / 4, 4, 2}, Vector2{0, 0}, 0.0f, WHITE);
 }
-
