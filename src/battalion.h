@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include "src/wall.h"
+#include "src/castle.h"
 
 enum class TroopState
 {
@@ -52,7 +53,10 @@ public:
     int getTroopCount() const { return m_troops.size(); }
     int getInitialTroopCount() const { return m_initialTroopCount; }
     void draw(bool selected, Texture2D spritesheet) const;
-    void update(float deltaTime, const std::vector<std::shared_ptr<Wall>> &walls);
+    void update(float deltaTime,
+     const std::vector<std::shared_ptr<Wall>> &walls,
+     const std::shared_ptr<Castle> &castle,
+     bool wallsUp);
 
 private:
     void removeDead();
@@ -68,8 +72,11 @@ private:
     std::vector<Troop> m_troops;
     std::weak_ptr<Battalion> m_target;
     std::vector<std::shared_ptr<Wall>> m_walls;
+    bool m_wallsUp;
 
     std::weak_ptr<Wall> m_target_wall;
+    std::weak_ptr<Castle> m_target_castle;
+    bool movedToCastle;
 
     int m_initialTroopCount;
     float m_rotation;
