@@ -1,5 +1,5 @@
 
-CXXFLAGS = -O1
+CXXFLAGS = -O3
 EMFLAGS = -s USE_GLFW=3 --bind --preload-file assets --pre-js prefix.js
 INCLUDES = -I . -I external/
 LDFLAGS  = -L external/raylib -lraylib
