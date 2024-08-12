@@ -33,7 +33,7 @@ Texture WorldGen::createWorldTexture(int boundX, int boundY)
     {
         for (int x = 0; x < boundX; x++)
         {
-            if (x < 8 && y > boundY - 8) {
+            if (x < 8 && y >= boundY - 8) {
                 DrawTexturePro(worldSpriteSheet, srcRects[7], {x * crispFactor, y * crispFactor, crispFactor, crispFactor}, {0, 0}, 0, WHITE);
                 continue;
             }
